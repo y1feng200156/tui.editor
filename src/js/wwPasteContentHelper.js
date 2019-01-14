@@ -198,7 +198,8 @@ class WwPasteContentHelper {
         return;
       }
 
-      $blockElement.replaceWith($blockElement.html());
+      const br = tagName === 'P' ? '<br>' : ''
+      $blockElement.replaceWith($blockElement.html() + br);
     });
   }
 

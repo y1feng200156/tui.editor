@@ -14584,7 +14584,7 @@ var WwClipboardManager = function () {
     value: function _onWillPaste(pasteData) {
       var _this2 = this;
 
-      var $clipboardContainer = (0, _jquery2.default)('<div>').append((0, _jquery2.default)('<div>').append(pasteData.fragment.cloneNode(true)).html().replace(/\n/g, ' ').replace(/<\/p>.*<p/g, '<br/></p><p'));
+      var $clipboardContainer = (0, _jquery2.default)('<div>').append((0, _jquery2.default)('<div>').append(pasteData.fragment.cloneNode(true)).html().replace(/\n/g, ' '));
 
       this._setTableBookmark($clipboardContainer);
 
@@ -15166,7 +15166,8 @@ var WwPasteContentHelper = function () {
           return;
         }
 
-        $blockElement.replaceWith($blockElement.html());
+        var br = tagName === 'P' ? '<br>' : '';
+        $blockElement.replaceWith($blockElement.html() + br);
       });
     }
 
