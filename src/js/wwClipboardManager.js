@@ -91,7 +91,7 @@ class WwClipboardManager {
   }
 
   _onWillPaste(pasteData) {
-    const $clipboardContainer = $('<div>').append(pasteData.fragment.cloneNode(true));
+    const $clipboardContainer = $('<div>').append($('<div>').append(pasteData.fragment.cloneNode(true)).html().replace(/\n/g, ' '));
 
     this._setTableBookmark($clipboardContainer);
 
