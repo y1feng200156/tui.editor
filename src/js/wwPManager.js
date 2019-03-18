@@ -58,7 +58,7 @@ class WwPManager {
         const lines = content.split(/<br>/gi);
         const lastIndex = lines.length - 1;
         // cross browsing: old browser not has nextElementSibling attribute
-        const nextElement = para.nextElementSibling || para.nextSibling;
+        // const nextElement = para.nextElementSibling || para.nextSibling;
         let splitedContent = '';
 
         splitedContent = lines.map((line, index) => {
@@ -76,9 +76,9 @@ class WwPManager {
         });
 
         // For paragraph, we add empty line
-        if (nextElement && nextElement.nodeName === 'P') {
-          splitedContent.push('<div><br></div>');
-        }
+        // if (nextElement && nextElement.nodeName === 'P') {
+        //   splitedContent.push('<div><br></div>');
+        // }
 
         $(para).replaceWith($(splitedContent.join('')));
       });

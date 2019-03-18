@@ -8165,6 +8165,7 @@ var Command = function () {
       this.setKeyMap(keyMap);
     }
   }
+
   /**
    * getName
    * returns Name of command
@@ -8471,7 +8472,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var markdownitHighlight = new _markdownIt2.default({
   html: true,
-  breaks: true,
+  breaks: false,
   quotes: '“”‘’',
   langPrefix: 'lang-',
   highlight: function highlight(codeText, type) {
@@ -8480,7 +8481,7 @@ var markdownitHighlight = new _markdownIt2.default({
 });
 var markdownit = new _markdownIt2.default({
   html: true,
-  breaks: true,
+  breaks: false,
   quotes: '“”‘’',
   langPrefix: 'lang-'
 });
@@ -10299,7 +10300,8 @@ var getTableCellByDirection = function getTableCellByDirection(node, direction) 
 
   if (_tuiCodeSnippet2.default.isUndefined(direction) || direction !== 'next' && direction !== 'previous') {
     return null;
-  } else if (direction === 'previous') {
+  }
+  if (direction === 'previous') {
     isForward = false;
   }
 
@@ -10332,7 +10334,8 @@ var getSiblingRowCellByDirection = function getSiblingRowCellByDirection(node, d
 
   if (_tuiCodeSnippet2.default.isUndefined(direction) || direction !== 'next' && direction !== 'previous') {
     return null;
-  } else if (direction === 'previous') {
+  }
+  if (direction === 'previous') {
     isForward = false;
   }
 

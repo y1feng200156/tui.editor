@@ -820,7 +820,8 @@ class WysiwygEditor {
 
     // remove contenteditable block, in this case div
     html = html.replace(/<div[^>]*>/g, '');
-    html = html.replace(/<\/div>/g, '<br />');
+    html = html.replace(/(<\/div>)+/g, '</div>');
+    html = html.replace(/<\/div>/g, '<br /><br />');
 
     html = this.eventManager.emitReduce('wysiwygProcessHTMLText', html);
 

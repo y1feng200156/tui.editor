@@ -90,8 +90,7 @@ class WwTableManager {
       selectionManager.removeClassAttrbuteFromAllCellsIfNeed();
     });
 
-    this.eventManager.listen('copyBefore.table', ({$clipboardContainer}) =>
-      this.updateTableHtmlOfClipboardIfNeed($clipboardContainer));
+    this.eventManager.listen('copyBefore.table', ({$clipboardContainer}) => this.updateTableHtmlOfClipboardIfNeed($clipboardContainer));
 
     this.onBindedPaste = this._onPaste.bind(this);
     this.wwe.getEditor().addEventListener('paste', this.onBindedPaste);
@@ -334,6 +333,7 @@ class WwTableManager {
       $(prevNode).remove();
     }
   }
+
   /**
    * Return whether delete non text or not
    * @param {Range} range Range object
@@ -354,6 +354,7 @@ class WwTableManager {
 
     return isCellDeleting || isEndOfText || isLastCellOfRow;
   }
+
   /**
    * _tableHandlerOnDelete
    * Delete handler in table
@@ -861,7 +862,8 @@ class WwTableManager {
 
       if (!this.isTableOrSubTableElement(node.nodeName)) {
         return;
-      } else if (node.nodeName === 'TABLE'
+      }
+      if (node.nodeName === 'TABLE'
                 && $node.find('thead').length === 0
                 && $node.find('tbody').length === 0
       ) {
@@ -879,6 +881,7 @@ class WwTableManager {
   resetLastCellNode() {
     this._lastCellNode = null;
   }
+
   /**
    * Set _lastCellNode to given node
    * @param {HTMLElement} node Table cell

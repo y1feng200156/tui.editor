@@ -428,7 +428,8 @@ const getTableCellByDirection = function(node, direction) {
 
   if (util.isUndefined(direction) || (direction !== 'next' && direction !== 'previous')) {
     return null;
-  } else if (direction === 'previous') {
+  }
+  if (direction === 'previous') {
     isForward = false;
   }
 
@@ -456,7 +457,8 @@ const getSiblingRowCellByDirection = function(node, direction, needEdgeCell) {
 
   if (util.isUndefined(direction) || (direction !== 'next' && direction !== 'previous')) {
     return null;
-  } else if (direction === 'previous') {
+  }
+  if (direction === 'previous') {
     isForward = false;
   }
 

@@ -889,7 +889,8 @@ var getTableCellByDirection = function getTableCellByDirection(node, direction) 
 
   if (_tuiCodeSnippet2.default.isUndefined(direction) || direction !== 'next' && direction !== 'previous') {
     return null;
-  } else if (direction === 'previous') {
+  }
+  if (direction === 'previous') {
     isForward = false;
   }
 
@@ -922,7 +923,8 @@ var getSiblingRowCellByDirection = function getSiblingRowCellByDirection(node, d
 
   if (_tuiCodeSnippet2.default.isUndefined(direction) || direction !== 'next' && direction !== 'previous') {
     return null;
-  } else if (direction === 'previous') {
+  }
+  if (direction === 'previous') {
     isForward = false;
   }
 
@@ -7856,6 +7858,7 @@ var WwTableManager = function () {
         (0, _jquery2.default)(prevNode).remove();
       }
     }
+
     /**
      * Return whether delete non text or not
      * @param {Range} range Range object
@@ -7876,6 +7879,7 @@ var WwTableManager = function () {
 
       return isCellDeleting || isEndOfText || isLastCellOfRow;
     }
+
     /**
      * _tableHandlerOnDelete
      * Delete handler in table
@@ -8457,7 +8461,8 @@ var WwTableManager = function () {
 
         if (!_this4.isTableOrSubTableElement(node.nodeName)) {
           return;
-        } else if (node.nodeName === 'TABLE' && $node.find('thead').length === 0 && $node.find('tbody').length === 0) {
+        }
+        if (node.nodeName === 'TABLE' && $node.find('thead').length === 0 && $node.find('tbody').length === 0) {
           $node.remove();
         }
 
@@ -8475,6 +8480,7 @@ var WwTableManager = function () {
     value: function resetLastCellNode() {
       this._lastCellNode = null;
     }
+
     /**
      * Set _lastCellNode to given node
      * @param {HTMLElement} node Table cell
@@ -10242,7 +10248,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var markdownitHighlight = new _markdownIt2.default({
   html: true,
-  breaks: true,
+  breaks: false,
   quotes: '“”‘’',
   langPrefix: 'lang-',
   highlight: function highlight(codeText, type) {
@@ -10251,7 +10257,7 @@ var markdownitHighlight = new _markdownIt2.default({
 });
 var markdownit = new _markdownIt2.default({
   html: true,
-  breaks: true,
+  breaks: false,
   quotes: '“”‘’',
   langPrefix: 'lang-'
 });
@@ -19134,7 +19140,8 @@ var WysiwygEditor = function () {
 
       // remove contenteditable block, in this case div
       html = html.replace(/<div[^>]*>/g, '');
-      html = html.replace(/<\/div>/g, '<br />');
+      html = html.replace(/(<\/div>)+/g, '</div>');
+      html = html.replace(/<\/div>/g, '<br /><br />');
 
       html = this.eventManager.emitReduce('wysiwygProcessHTMLText', html);
 
@@ -21664,7 +21671,7 @@ var WwPManager = function () {
           var lines = content.split(/<br>/gi);
           var lastIndex = lines.length - 1;
           // cross browsing: old browser not has nextElementSibling attribute
-          var nextElement = para.nextElementSibling || para.nextSibling;
+          // const nextElement = para.nextElementSibling || para.nextSibling;
           var splitedContent = '';
 
           splitedContent = lines.map(function (line, index) {
@@ -21682,9 +21689,9 @@ var WwPManager = function () {
           });
 
           // For paragraph, we add empty line
-          if (nextElement && nextElement.nodeName === 'P') {
-            splitedContent.push('<div><br></div>');
-          }
+          // if (nextElement && nextElement.nodeName === 'P') {
+          //   splitedContent.push('<div><br></div>');
+          // }
 
           (0, _jquery2.default)(para).replaceWith((0, _jquery2.default)(splitedContent.join('')));
         });
@@ -23336,6 +23343,7 @@ var Command = function () {
       this.setKeyMap(keyMap);
     }
   }
+
   /**
    * getName
    * returns Name of command
