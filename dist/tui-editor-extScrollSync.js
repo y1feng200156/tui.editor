@@ -76,7 +76,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "dist/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 47);
+/******/ 	return __webpack_require__(__webpack_require__.s = 46);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -132,7 +132,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
 /***/ }),
 
-/***/ 47:
+/***/ 46:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -150,11 +150,11 @@ var _editorProxy = __webpack_require__(1);
 
 var _editorProxy2 = _interopRequireDefault(_editorProxy);
 
-var _scrollManager = __webpack_require__(48);
+var _scrollManager = __webpack_require__(47);
 
 var _scrollManager2 = _interopRequireDefault(_scrollManager);
 
-var _sectionManager = __webpack_require__(49);
+var _sectionManager = __webpack_require__(48);
 
 var _sectionManager2 = _interopRequireDefault(_sectionManager);
 
@@ -281,7 +281,7 @@ exports.default = scrollSyncExtension;
 
 /***/ }),
 
-/***/ 48:
+/***/ 47:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -719,7 +719,7 @@ exports.default = ScrollManager;
 
 /***/ }),
 
-/***/ 49:
+/***/ 48:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

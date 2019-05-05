@@ -13,7 +13,7 @@
 		exports["Editor"] = factory(require("jquery"), require("tui-code-snippet"), require("codemirror"), require("to-mark"), require("tui-chart"), require("squire-rte"), require("markdown-it"), require("highlight.js"), require("tui-color-picker"), require("plantuml-encoder"));
 	else
 		root["tui"] = root["tui"] || {}, root["tui"]["Editor"] = factory(root["$"], (root["tui"] && root["tui"]["util"]), root["CodeMirror"], root["toMark"], (root["tui"] && root["tui"]["chart"]), root["Squire"], root["markdownit"], root["hljs"], (root["tui"] && root["tui"]["colorPicker"]), root["plantumlEncoder"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_42__, __WEBPACK_EXTERNAL_MODULE_57__, __WEBPACK_EXTERNAL_MODULE_77__, __WEBPACK_EXTERNAL_MODULE_83__, __WEBPACK_EXTERNAL_MODULE_91__, __WEBPACK_EXTERNAL_MODULE_199__, __WEBPACK_EXTERNAL_MODULE_201__) {
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_42__, __WEBPACK_EXTERNAL_MODULE_57__, __WEBPACK_EXTERNAL_MODULE_77__, __WEBPACK_EXTERNAL_MODULE_83__, __WEBPACK_EXTERNAL_MODULE_91__, __WEBPACK_EXTERNAL_MODULE_198__, __WEBPACK_EXTERNAL_MODULE_200__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -2179,33 +2179,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_10__;
 
 /***/ }),
 /* 11 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2239,7 +2212,7 @@ module.exports = g;
 
 /*<replacement>*/
 
-var pna = __webpack_require__(19);
+var processNextTick = __webpack_require__(19);
 /*</replacement>*/
 
 /*<replacement>*/
@@ -2263,13 +2236,10 @@ var Writable = __webpack_require__(27);
 
 util.inherits(Duplex, Readable);
 
-{
-  // avoid scope creep, the keys array can then be collected
-  var keys = objectKeys(Writable.prototype);
-  for (var v = 0; v < keys.length; v++) {
-    var method = keys[v];
-    if (!Duplex.prototype[method]) Duplex.prototype[method] = Writable.prototype[method];
-  }
+var keys = objectKeys(Writable.prototype);
+for (var v = 0; v < keys.length; v++) {
+  var method = keys[v];
+  if (!Duplex.prototype[method]) Duplex.prototype[method] = Writable.prototype[method];
 }
 
 function Duplex(options) {
@@ -2288,16 +2258,6 @@ function Duplex(options) {
   this.once('end', onend);
 }
 
-Object.defineProperty(Duplex.prototype, 'writableHighWaterMark', {
-  // making it explicit this property is not enumerable
-  // because otherwise some prototype manipulation in
-  // userland will fail
-  enumerable: false,
-  get: function () {
-    return this._writableState.highWaterMark;
-  }
-});
-
 // the no-half-open enforcer
 function onend() {
   // if we allow half-open state, or if the writable side ended,
@@ -2306,7 +2266,7 @@ function onend() {
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
-  pna.nextTick(onEndNT, this);
+  processNextTick(onEndNT, this);
 }
 
 function onEndNT(self) {
@@ -2338,8 +2298,41 @@ Duplex.prototype._destroy = function (err, cb) {
   this.push(null);
   this.end();
 
-  pna.nextTick(cb, err);
+  processNextTick(cb, err);
 };
+
+function forEach(xs, f) {
+  for (var i = 0, l = xs.length; i < l; i++) {
+    f(xs[i], i);
+  }
+}
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
 
 /***/ }),
 /* 13 */
@@ -3350,9 +3343,9 @@ process.umask = function() { return 0; };
 if (!process.version ||
     process.version.indexOf('v0.') === 0 ||
     process.version.indexOf('v1.') === 0 && process.version.indexOf('v1.8.') !== 0) {
-  module.exports = { nextTick: nextTick };
+  module.exports = nextTick;
 } else {
-  module.exports = process
+  module.exports = process.nextTick;
 }
 
 function nextTick(fn, arg1, arg2, arg3) {
@@ -3388,7 +3381,6 @@ function nextTick(fn, arg1, arg2, arg3) {
     });
   }
 }
-
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(18)))
 
@@ -4524,9 +4516,9 @@ exports = module.exports = __webpack_require__(48);
 exports.Stream = exports;
 exports.Readable = exports;
 exports.Writable = __webpack_require__(27);
-exports.Duplex = __webpack_require__(12);
+exports.Duplex = __webpack_require__(11);
 exports.Transform = __webpack_require__(54);
-exports.PassThrough = __webpack_require__(174);
+exports.PassThrough = __webpack_require__(173);
 
 
 /***/ }),
@@ -4563,7 +4555,7 @@ exports.PassThrough = __webpack_require__(174);
 
 /*<replacement>*/
 
-var pna = __webpack_require__(19);
+var processNextTick = __webpack_require__(19);
 /*</replacement>*/
 
 module.exports = Writable;
@@ -4590,7 +4582,7 @@ function CorkedRequest(state) {
 /* </replacement> */
 
 /*<replacement>*/
-var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
+var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
 /*</replacement>*/
 
 /*<replacement>*/
@@ -4606,7 +4598,7 @@ util.inherits = __webpack_require__(13);
 
 /*<replacement>*/
 var internalUtil = {
-  deprecate: __webpack_require__(173)
+  deprecate: __webpack_require__(172)
 };
 /*</replacement>*/
 
@@ -4615,7 +4607,6 @@ var Stream = __webpack_require__(50);
 /*</replacement>*/
 
 /*<replacement>*/
-
 var Buffer = __webpack_require__(20).Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
@@ -4624,7 +4615,6 @@ function _uint8ArrayToBuffer(chunk) {
 function _isUint8Array(obj) {
   return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
-
 /*</replacement>*/
 
 var destroyImpl = __webpack_require__(52);
@@ -4634,31 +4624,22 @@ util.inherits(Writable, Stream);
 function nop() {}
 
 function WritableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(12);
+  Duplex = Duplex || __webpack_require__(11);
 
   options = options || {};
-
-  // Duplex streams are both readable and writable, but share
-  // the same options object.
-  // However, some cases require setting options to different
-  // values for the readable and the writable sides of the duplex stream.
-  // These options can be provided separately as readableXXX and writableXXX.
-  var isDuplex = stream instanceof Duplex;
 
   // object stream flag to indicate whether or not this stream
   // contains buffers or objects.
   this.objectMode = !!options.objectMode;
 
-  if (isDuplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
+  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
 
   // the point at which write() starts returning false
   // Note: 0 is a valid value, means that we always return false if
   // the entire buffer is not flushed immediately on write()
   var hwm = options.highWaterMark;
-  var writableHwm = options.writableHighWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-
-  if (hwm || hwm === 0) this.highWaterMark = hwm;else if (isDuplex && (writableHwm || writableHwm === 0)) this.highWaterMark = writableHwm;else this.highWaterMark = defaultHwm;
+  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
 
   // cast to ints.
   this.highWaterMark = Math.floor(this.highWaterMark);
@@ -4772,7 +4753,6 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
   Object.defineProperty(Writable, Symbol.hasInstance, {
     value: function (object) {
       if (realHasInstance.call(this, object)) return true;
-      if (this !== Writable) return false;
 
       return object && object._writableState instanceof WritableState;
     }
@@ -4784,7 +4764,7 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
 }
 
 function Writable(options) {
-  Duplex = Duplex || __webpack_require__(12);
+  Duplex = Duplex || __webpack_require__(11);
 
   // Writable ctor is applied to Duplexes, too.
   // `realHasInstance` is necessary because using plain `instanceof`
@@ -4824,7 +4804,7 @@ function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
   // TODO: defer error events consistently everywhere, not just the cb
   stream.emit('error', er);
-  pna.nextTick(cb, er);
+  processNextTick(cb, er);
 }
 
 // Checks that a user-supplied chunk is valid, especially for the particular
@@ -4841,7 +4821,7 @@ function validChunk(stream, state, chunk, cb) {
   }
   if (er) {
     stream.emit('error', er);
-    pna.nextTick(cb, er);
+    processNextTick(cb, er);
     valid = false;
   }
   return valid;
@@ -4850,7 +4830,7 @@ function validChunk(stream, state, chunk, cb) {
 Writable.prototype.write = function (chunk, encoding, cb) {
   var state = this._writableState;
   var ret = false;
-  var isBuf = !state.objectMode && _isUint8Array(chunk);
+  var isBuf = _isUint8Array(chunk) && !state.objectMode;
 
   if (isBuf && !Buffer.isBuffer(chunk)) {
     chunk = _uint8ArrayToBuffer(chunk);
@@ -4903,16 +4883,6 @@ function decodeChunk(state, chunk, encoding) {
   }
   return chunk;
 }
-
-Object.defineProperty(Writable.prototype, 'writableHighWaterMark', {
-  // making it explicit this property is not enumerable
-  // because otherwise some prototype manipulation in
-  // userland will fail
-  enumerable: false,
-  get: function () {
-    return this._writableState.highWaterMark;
-  }
-});
 
 // if we're already writing something, then just put this
 // in the queue, and wait our turn.  Otherwise, call _write
@@ -4971,10 +4941,10 @@ function onwriteError(stream, state, sync, er, cb) {
   if (sync) {
     // defer the callback if we are being called synchronously
     // to avoid piling up things on the stack
-    pna.nextTick(cb, er);
+    processNextTick(cb, er);
     // this can emit finish, and it will always happen
     // after error
-    pna.nextTick(finishMaybe, stream, state);
+    processNextTick(finishMaybe, stream, state);
     stream._writableState.errorEmitted = true;
     stream.emit('error', er);
   } else {
@@ -5072,7 +5042,6 @@ function clearBuffer(stream, state) {
     } else {
       state.corkedRequestsFree = new CorkedRequest(state);
     }
-    state.bufferedRequestCount = 0;
   } else {
     // Slow case, write chunks one-by-one
     while (entry) {
@@ -5083,7 +5052,6 @@ function clearBuffer(stream, state) {
 
       doWrite(stream, state, false, len, chunk, encoding, cb);
       entry = entry.next;
-      state.bufferedRequestCount--;
       // if we didn't call the onwrite immediately, then
       // it means that we need to wait until it does.
       // also, that means that the chunk and cb are currently
@@ -5096,6 +5064,7 @@ function clearBuffer(stream, state) {
     if (entry === null) state.lastBufferedRequest = null;
   }
 
+  state.bufferedRequestCount = 0;
   state.bufferedRequest = entry;
   state.bufferProcessing = false;
 }
@@ -5149,7 +5118,7 @@ function prefinish(stream, state) {
     if (typeof stream._final === 'function') {
       state.pendingcb++;
       state.finalCalled = true;
-      pna.nextTick(callFinal, stream, state);
+      processNextTick(callFinal, stream, state);
     } else {
       state.prefinished = true;
       stream.emit('prefinish');
@@ -5173,7 +5142,7 @@ function endWritable(stream, state, cb) {
   state.ending = true;
   finishMaybe(stream, state);
   if (cb) {
-    if (state.finished) pna.nextTick(cb);else stream.once('finish', cb);
+    if (state.finished) processNextTick(cb);else stream.once('finish', cb);
   }
   state.ended = true;
   stream.writable = false;
@@ -5221,7 +5190,7 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(18), __webpack_require__(171).setImmediate, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(18), __webpack_require__(170).setImmediate, __webpack_require__(12)))
 
 /***/ }),
 /* 28 */
@@ -11450,10 +11419,10 @@ var inherits = __webpack_require__(13);
 
 inherits(Stream, EE);
 Stream.Readable = __webpack_require__(26);
-Stream.Writable = __webpack_require__(175);
-Stream.Duplex = __webpack_require__(176);
-Stream.Transform = __webpack_require__(177);
-Stream.PassThrough = __webpack_require__(178);
+Stream.Writable = __webpack_require__(174);
+Stream.Duplex = __webpack_require__(175);
+Stream.Transform = __webpack_require__(176);
+Stream.PassThrough = __webpack_require__(177);
 
 // Backwards-compat with node 0.4.x
 Stream.Stream = Stream;
@@ -11581,7 +11550,7 @@ Stream.prototype.pipe = function(dest, options) {
 
 /*<replacement>*/
 
-var pna = __webpack_require__(19);
+var processNextTick = __webpack_require__(19);
 /*</replacement>*/
 
 module.exports = Readable;
@@ -11608,8 +11577,9 @@ var EElistenerCount = function (emitter, type) {
 var Stream = __webpack_require__(50);
 /*</replacement>*/
 
+// TODO(bmeurer): Change this back to const once hole checks are
+// properly optimized away early in Ignition+TurboFan.
 /*<replacement>*/
-
 var Buffer = __webpack_require__(20).Buffer;
 var OurUint8Array = global.Uint8Array || function () {};
 function _uint8ArrayToBuffer(chunk) {
@@ -11618,7 +11588,6 @@ function _uint8ArrayToBuffer(chunk) {
 function _isUint8Array(obj) {
   return Buffer.isBuffer(obj) || obj instanceof OurUint8Array;
 }
-
 /*</replacement>*/
 
 /*<replacement>*/
@@ -11647,40 +11616,33 @@ var kProxyEvents = ['error', 'close', 'destroy', 'pause', 'resume'];
 function prependListener(emitter, event, fn) {
   // Sadly this is not cacheable as some libraries bundle their own
   // event emitter implementation with them.
-  if (typeof emitter.prependListener === 'function') return emitter.prependListener(event, fn);
-
-  // This is a hack to make sure that our error handler is attached before any
-  // userland ones.  NEVER DO THIS. This is here only because this code needs
-  // to continue to work with older versions of Node.js that do not include
-  // the prependListener() method. The goal is to eventually remove this hack.
-  if (!emitter._events || !emitter._events[event]) emitter.on(event, fn);else if (isArray(emitter._events[event])) emitter._events[event].unshift(fn);else emitter._events[event] = [fn, emitter._events[event]];
+  if (typeof emitter.prependListener === 'function') {
+    return emitter.prependListener(event, fn);
+  } else {
+    // This is a hack to make sure that our error handler is attached before any
+    // userland ones.  NEVER DO THIS. This is here only because this code needs
+    // to continue to work with older versions of Node.js that do not include
+    // the prependListener() method. The goal is to eventually remove this hack.
+    if (!emitter._events || !emitter._events[event]) emitter.on(event, fn);else if (isArray(emitter._events[event])) emitter._events[event].unshift(fn);else emitter._events[event] = [fn, emitter._events[event]];
+  }
 }
 
 function ReadableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(12);
+  Duplex = Duplex || __webpack_require__(11);
 
   options = options || {};
-
-  // Duplex streams are both readable and writable, but share
-  // the same options object.
-  // However, some cases require setting options to different
-  // values for the readable and the writable sides of the duplex stream.
-  // These options can be provided separately as readableXXX and writableXXX.
-  var isDuplex = stream instanceof Duplex;
 
   // object stream flag. Used to make read(n) ignore n and to
   // make all the buffer merging and length checks go away
   this.objectMode = !!options.objectMode;
 
-  if (isDuplex) this.objectMode = this.objectMode || !!options.readableObjectMode;
+  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.readableObjectMode;
 
   // the point at which it stops calling _read() to fill the buffer
   // Note: 0 is a valid value, means "don't call _read preemptively ever"
   var hwm = options.highWaterMark;
-  var readableHwm = options.readableHighWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-
-  if (hwm || hwm === 0) this.highWaterMark = hwm;else if (isDuplex && (readableHwm || readableHwm === 0)) this.highWaterMark = readableHwm;else this.highWaterMark = defaultHwm;
+  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
 
   // cast to ints.
   this.highWaterMark = Math.floor(this.highWaterMark);
@@ -11734,7 +11696,7 @@ function ReadableState(options, stream) {
 }
 
 function Readable(options) {
-  Duplex = Duplex || __webpack_require__(12);
+  Duplex = Duplex || __webpack_require__(11);
 
   if (!(this instanceof Readable)) return new Readable(options);
 
@@ -12053,7 +12015,7 @@ function emitReadable(stream) {
   if (!state.emittedReadable) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
-    if (state.sync) pna.nextTick(emitReadable_, stream);else emitReadable_(stream);
+    if (state.sync) processNextTick(emitReadable_, stream);else emitReadable_(stream);
   }
 }
 
@@ -12072,7 +12034,7 @@ function emitReadable_(stream) {
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
-    pna.nextTick(maybeReadMore_, stream, state);
+    processNextTick(maybeReadMore_, stream, state);
   }
 }
 
@@ -12117,7 +12079,7 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
   var doEnd = (!pipeOpts || pipeOpts.end !== false) && dest !== process.stdout && dest !== process.stderr;
 
   var endFn = doEnd ? onend : unpipe;
-  if (state.endEmitted) pna.nextTick(endFn);else src.once('end', endFn);
+  if (state.endEmitted) processNextTick(endFn);else src.once('end', endFn);
 
   dest.on('unpipe', onunpipe);
   function onunpipe(readable, unpipeInfo) {
@@ -12307,7 +12269,7 @@ Readable.prototype.on = function (ev, fn) {
       state.readableListening = state.needReadable = true;
       state.emittedReadable = false;
       if (!state.reading) {
-        pna.nextTick(nReadingNextTick, this);
+        processNextTick(nReadingNextTick, this);
       } else if (state.length) {
         emitReadable(this);
       }
@@ -12338,7 +12300,7 @@ Readable.prototype.resume = function () {
 function resume(stream, state) {
   if (!state.resumeScheduled) {
     state.resumeScheduled = true;
-    pna.nextTick(resume_, stream, state);
+    processNextTick(resume_, stream, state);
   }
 }
 
@@ -12375,19 +12337,18 @@ function flow(stream) {
 // This is *not* part of the readable stream interface.
 // It is an ugly unfortunate mess of history.
 Readable.prototype.wrap = function (stream) {
-  var _this = this;
-
   var state = this._readableState;
   var paused = false;
 
+  var self = this;
   stream.on('end', function () {
     debug('wrapped end');
     if (state.decoder && !state.ended) {
       var chunk = state.decoder.end();
-      if (chunk && chunk.length) _this.push(chunk);
+      if (chunk && chunk.length) self.push(chunk);
     }
 
-    _this.push(null);
+    self.push(null);
   });
 
   stream.on('data', function (chunk) {
@@ -12397,7 +12358,7 @@ Readable.prototype.wrap = function (stream) {
     // don't skip over falsy values in objectMode
     if (state.objectMode && (chunk === null || chunk === undefined)) return;else if (!state.objectMode && (!chunk || !chunk.length)) return;
 
-    var ret = _this.push(chunk);
+    var ret = self.push(chunk);
     if (!ret) {
       paused = true;
       stream.pause();
@@ -12418,12 +12379,12 @@ Readable.prototype.wrap = function (stream) {
 
   // proxy certain important events.
   for (var n = 0; n < kProxyEvents.length; n++) {
-    stream.on(kProxyEvents[n], this.emit.bind(this, kProxyEvents[n]));
+    stream.on(kProxyEvents[n], self.emit.bind(self, kProxyEvents[n]));
   }
 
   // when we try to consume some more bytes, simply unpause the
   // underlying stream.
-  this._read = function (n) {
+  self._read = function (n) {
     debug('wrapped _read', n);
     if (paused) {
       paused = false;
@@ -12431,18 +12392,8 @@ Readable.prototype.wrap = function (stream) {
     }
   };
 
-  return this;
+  return self;
 };
-
-Object.defineProperty(Readable.prototype, 'readableHighWaterMark', {
-  // making it explicit this property is not enumerable
-  // because otherwise some prototype manipulation in
-  // userland will fail
-  enumerable: false,
-  get: function () {
-    return this._readableState.highWaterMark;
-  }
-});
 
 // exposed for testing purposes only.
 Readable._fromList = fromList;
@@ -12556,7 +12507,7 @@ function endReadable(stream) {
 
   if (!state.endEmitted) {
     state.ended = true;
-    pna.nextTick(endReadableNT, state, stream);
+    processNextTick(endReadableNT, state, stream);
   }
 }
 
@@ -12569,13 +12520,19 @@ function endReadableNT(state, stream) {
   }
 }
 
+function forEach(xs, f) {
+  for (var i = 0, l = xs.length; i < l; i++) {
+    f(xs[i], i);
+  }
+}
+
 function indexOf(xs, x) {
   for (var i = 0, l = xs.length; i < l; i++) {
     if (xs[i] === x) return i;
   }
   return -1;
 }
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11), __webpack_require__(18)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12), __webpack_require__(18)))
 
 /***/ }),
 /* 49 */
@@ -14390,7 +14347,7 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
 
 /***/ }),
 /* 52 */
@@ -14401,7 +14358,7 @@ function isnan (val) {
 
 /*<replacement>*/
 
-var pna = __webpack_require__(19);
+var processNextTick = __webpack_require__(19);
 /*</replacement>*/
 
 // undocumented cb() API, needed for core, not for public API
@@ -14415,9 +14372,9 @@ function destroy(err, cb) {
     if (cb) {
       cb(err);
     } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
-      pna.nextTick(emitErrorNT, this, err);
+      processNextTick(emitErrorNT, this, err);
     }
-    return this;
+    return;
   }
 
   // we set destroyed to true before firing error callbacks in order
@@ -14434,7 +14391,7 @@ function destroy(err, cb) {
 
   this._destroy(err || null, function (err) {
     if (!cb && err) {
-      pna.nextTick(emitErrorNT, _this, err);
+      processNextTick(emitErrorNT, _this, err);
       if (_this._writableState) {
         _this._writableState.errorEmitted = true;
       }
@@ -14442,8 +14399,6 @@ function destroy(err, cb) {
       cb(err);
     }
   });
-
-  return this;
 }
 
 function undestroy() {
@@ -14477,33 +14432,9 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-
-/*<replacement>*/
 
 var Buffer = __webpack_require__(20).Buffer;
-/*</replacement>*/
 
 var isEncoding = Buffer.isEncoding || function (encoding) {
   encoding = '' + encoding;
@@ -14615,10 +14546,10 @@ StringDecoder.prototype.fillLast = function (buf) {
 };
 
 // Checks the type of a UTF-8 byte, whether it's ASCII, a leading byte, or a
-// continuation byte. If an invalid byte is detected, -2 is returned.
+// continuation byte.
 function utf8CheckByte(byte) {
   if (byte <= 0x7F) return 0;else if (byte >> 5 === 0x06) return 2;else if (byte >> 4 === 0x0E) return 3;else if (byte >> 3 === 0x1E) return 4;
-  return byte >> 6 === 0x02 ? -1 : -2;
+  return -1;
 }
 
 // Checks at most 3 bytes at the end of a Buffer in order to detect an
@@ -14632,13 +14563,13 @@ function utf8CheckIncomplete(self, buf, i) {
     if (nb > 0) self.lastNeed = nb - 1;
     return nb;
   }
-  if (--j < i || nb === -2) return 0;
+  if (--j < i) return 0;
   nb = utf8CheckByte(buf[j]);
   if (nb >= 0) {
     if (nb > 0) self.lastNeed = nb - 2;
     return nb;
   }
-  if (--j < i || nb === -2) return 0;
+  if (--j < i) return 0;
   nb = utf8CheckByte(buf[j]);
   if (nb >= 0) {
     if (nb > 0) {
@@ -14652,7 +14583,7 @@ function utf8CheckIncomplete(self, buf, i) {
 // Validates as many continuation bytes for a multi-byte UTF-8 character as
 // needed or are available. If we see a non-continuation byte where we expect
 // one, we "replace" the validated continuation bytes we've seen so far with
-// a single UTF-8 replacement character ('\ufffd'), to match v8's UTF-8 decoding
+// UTF-8 replacement characters ('\ufffd'), to match v8's UTF-8 decoding
 // behavior. The continuation byte check is included three times in the case
 // where all of the continuation bytes for a character exist in the same buffer.
 // It is also done this way as a slight performance increase instead of using a
@@ -14660,17 +14591,17 @@ function utf8CheckIncomplete(self, buf, i) {
 function utf8CheckExtraBytes(self, buf, p) {
   if ((buf[0] & 0xC0) !== 0x80) {
     self.lastNeed = 0;
-    return '\ufffd';
+    return '\ufffd'.repeat(p);
   }
   if (self.lastNeed > 1 && buf.length > 1) {
     if ((buf[1] & 0xC0) !== 0x80) {
       self.lastNeed = 1;
-      return '\ufffd';
+      return '\ufffd'.repeat(p + 1);
     }
     if (self.lastNeed > 2 && buf.length > 2) {
       if ((buf[2] & 0xC0) !== 0x80) {
         self.lastNeed = 2;
-        return '\ufffd';
+        return '\ufffd'.repeat(p + 2);
       }
     }
   }
@@ -14701,11 +14632,11 @@ function utf8Text(buf, i) {
   return buf.toString('utf8', i, end);
 }
 
-// For UTF-8, a replacement character is added when ending on a partial
-// character.
+// For UTF-8, a replacement character for each buffered byte of a (partial)
+// character needs to be added to the output.
 function utf8End(buf) {
   var r = buf && buf.length ? this.write(buf) : '';
-  if (this.lastNeed) return r + '\ufffd';
+  if (this.lastNeed) return r + '\ufffd'.repeat(this.lastTotal - this.lastNeed);
   return r;
 }
 
@@ -14846,7 +14777,7 @@ function simpleEnd(buf) {
 
 module.exports = Transform;
 
-var Duplex = __webpack_require__(12);
+var Duplex = __webpack_require__(11);
 
 /*<replacement>*/
 var util = __webpack_require__(16);
@@ -14855,28 +14786,39 @@ util.inherits = __webpack_require__(13);
 
 util.inherits(Transform, Duplex);
 
-function afterTransform(er, data) {
-  var ts = this._transformState;
+function TransformState(stream) {
+  this.afterTransform = function (er, data) {
+    return afterTransform(stream, er, data);
+  };
+
+  this.needTransform = false;
+  this.transforming = false;
+  this.writecb = null;
+  this.writechunk = null;
+  this.writeencoding = null;
+}
+
+function afterTransform(stream, er, data) {
+  var ts = stream._transformState;
   ts.transforming = false;
 
   var cb = ts.writecb;
 
   if (!cb) {
-    return this.emit('error', new Error('write callback called multiple times'));
+    return stream.emit('error', new Error('write callback called multiple times'));
   }
 
   ts.writechunk = null;
   ts.writecb = null;
 
-  if (data != null) // single equals check for both `null` and `undefined`
-    this.push(data);
+  if (data !== null && data !== undefined) stream.push(data);
 
   cb(er);
 
-  var rs = this._readableState;
+  var rs = stream._readableState;
   rs.reading = false;
   if (rs.needReadable || rs.length < rs.highWaterMark) {
-    this._read(rs.highWaterMark);
+    stream._read(rs.highWaterMark);
   }
 }
 
@@ -14885,14 +14827,9 @@ function Transform(options) {
 
   Duplex.call(this, options);
 
-  this._transformState = {
-    afterTransform: afterTransform.bind(this),
-    needTransform: false,
-    transforming: false,
-    writecb: null,
-    writechunk: null,
-    writeencoding: null
-  };
+  this._transformState = new TransformState(this);
+
+  var stream = this;
 
   // start out asking for a readable event once data is transformed.
   this._readableState.needReadable = true;
@@ -14909,19 +14846,11 @@ function Transform(options) {
   }
 
   // When the writable side finishes, then flush out anything remaining.
-  this.on('prefinish', prefinish);
-}
-
-function prefinish() {
-  var _this = this;
-
-  if (typeof this._flush === 'function') {
-    this._flush(function (er, data) {
-      done(_this, er, data);
-    });
-  } else {
-    done(this, null, null);
-  }
+  this.once('prefinish', function () {
+    if (typeof this._flush === 'function') this._flush(function (er, data) {
+      done(stream, er, data);
+    });else done(stream);
+  });
 }
 
 Transform.prototype.push = function (chunk, encoding) {
@@ -14971,25 +14900,27 @@ Transform.prototype._read = function (n) {
 };
 
 Transform.prototype._destroy = function (err, cb) {
-  var _this2 = this;
+  var _this = this;
 
   Duplex.prototype._destroy.call(this, err, function (err2) {
     cb(err2);
-    _this2.emit('close');
+    _this.emit('close');
   });
 };
 
 function done(stream, er, data) {
   if (er) return stream.emit('error', er);
 
-  if (data != null) // single equals check for both `null` and `undefined`
-    stream.push(data);
+  if (data !== null && data !== undefined) stream.push(data);
 
   // if there's nothing in the write buffer, then that means
   // that nothing more will ever be provided
-  if (stream._writableState.length) throw new Error('Calling transform done when ws.length != 0');
+  var ws = stream._writableState;
+  var ts = stream._transformState;
 
-  if (stream._transformState.transforming) throw new Error('Calling transform done when still transforming');
+  if (ws.length) throw new Error('Calling transform done when ws.length != 0');
+
+  if (ts.transforming) throw new Error('Calling transform done when still transforming');
 
   return stream.push(null);
 }
@@ -15003,19 +14934,19 @@ function done(stream, er, data) {
 
 __webpack_require__(56);
 
-__webpack_require__(180);
+__webpack_require__(179);
 
-__webpack_require__(183);
+__webpack_require__(182);
 
-__webpack_require__(198);
+__webpack_require__(197);
 
-__webpack_require__(200);
+__webpack_require__(199);
 
 /**
  * @fileoverview entry point for editor with all extension included
  * @author NHN Ent. FE Development Lab <dl_javascript@nhnent.com>
  */
-var Editor = __webpack_require__(202);
+var Editor = __webpack_require__(201);
 
 module.exports = Editor;
 
@@ -20177,7 +20108,7 @@ var WwPasteContentHelper = function () {
       _tuiCodeSnippet2.default.forEachArray(array, function (node) {
         var isTextNode = node.nodeType === 3;
         /* eslint-disable max-len */
-        var isInlineNode = /^(SPAN|A|CODE|EM|I|STRONG|B|S|ABBR|ACRONYM|CITE|DFN|KBD|SAMP|VAR|BDO|Q|SUB|SUP)$/ig.test(node.tagName);
+        var isInlineNode = /^(SPAN|A|CODE|EM|I|STRONG|B|S|ABBR|ACRONYM|CITE|DFN|KBD|SAMP|VAR|BDO|Q|SUB|SUP|U)$/ig.test(node.tagName);
         /* eslint-enable max-len */
 
         if (isTextNode || isInlineNode) {
@@ -25520,6 +25451,7 @@ var MapShim = (function () {
     if (typeof Map !== 'undefined') {
         return Map;
     }
+
     /**
      * Returns index in provided array that matches the specified key.
      *
@@ -25529,89 +25461,107 @@ var MapShim = (function () {
      */
     function getIndex(arr, key) {
         var result = -1;
+
         arr.some(function (entry, index) {
             if (entry[0] === key) {
                 result = index;
+
                 return true;
             }
+
             return false;
         });
+
         return result;
     }
-    return /** @class */ (function () {
-        function class_1() {
+
+    return (function () {
+        function anonymous() {
             this.__entries__ = [];
         }
-        Object.defineProperty(class_1.prototype, "size", {
-            /**
-             * @returns {boolean}
-             */
-            get: function () {
-                return this.__entries__.length;
-            },
-            enumerable: true,
-            configurable: true
-        });
+
+        var prototypeAccessors = { size: { configurable: true } };
+
+        /**
+         * @returns {boolean}
+         */
+        prototypeAccessors.size.get = function () {
+            return this.__entries__.length;
+        };
+
         /**
          * @param {*} key
          * @returns {*}
          */
-        class_1.prototype.get = function (key) {
+        anonymous.prototype.get = function (key) {
             var index = getIndex(this.__entries__, key);
             var entry = this.__entries__[index];
+
             return entry && entry[1];
         };
+
         /**
          * @param {*} key
          * @param {*} value
          * @returns {void}
          */
-        class_1.prototype.set = function (key, value) {
+        anonymous.prototype.set = function (key, value) {
             var index = getIndex(this.__entries__, key);
+
             if (~index) {
                 this.__entries__[index][1] = value;
-            }
-            else {
+            } else {
                 this.__entries__.push([key, value]);
             }
         };
+
         /**
          * @param {*} key
          * @returns {void}
          */
-        class_1.prototype.delete = function (key) {
+        anonymous.prototype.delete = function (key) {
             var entries = this.__entries__;
             var index = getIndex(entries, key);
+
             if (~index) {
                 entries.splice(index, 1);
             }
         };
+
         /**
          * @param {*} key
          * @returns {void}
          */
-        class_1.prototype.has = function (key) {
+        anonymous.prototype.has = function (key) {
             return !!~getIndex(this.__entries__, key);
         };
+
         /**
          * @returns {void}
          */
-        class_1.prototype.clear = function () {
+        anonymous.prototype.clear = function () {
             this.__entries__.splice(0);
         };
+
         /**
          * @param {Function} callback
          * @param {*} [ctx=null]
          * @returns {void}
          */
-        class_1.prototype.forEach = function (callback, ctx) {
-            if (ctx === void 0) { ctx = null; }
-            for (var _i = 0, _a = this.__entries__; _i < _a.length; _i++) {
-                var entry = _a[_i];
+        anonymous.prototype.forEach = function (callback, ctx) {
+            var this$1 = this;
+            if ( ctx === void 0 ) ctx = null;
+
+            for (var i = 0, list = this$1.__entries__; i < list.length; i += 1) {
+                var entry = list[i];
+
                 callback.call(ctx, entry[1], entry[0]);
             }
         };
-        return class_1;
+
+        Object.defineProperties( anonymous.prototype, prototypeAccessors );
+
+        return anonymous;
     }());
 })();
 
@@ -25625,12 +25575,15 @@ var global$1 = (function () {
     if (typeof global !== 'undefined' && global.Math === Math) {
         return global;
     }
+
     if (typeof self !== 'undefined' && self.Math === Math) {
         return self;
     }
+
     if (typeof window !== 'undefined' && window.Math === Math) {
         return window;
     }
+
     // eslint-disable-next-line no-new-func
     return Function('return this')();
 })();
@@ -25648,11 +25601,13 @@ var requestAnimationFrame$1 = (function () {
         // object on the left hand side.
         return requestAnimationFrame.bind(global$1);
     }
+
     return function (callback) { return setTimeout(function () { return callback(Date.now()); }, 1000 / 60); };
 })();
 
 // Defines minimum timeout before adding a trailing call.
 var trailingTimeout = 2;
+
 /**
  * Creates a wrapper function which ensures that provided callback will be
  * invoked only once during the specified delay period.
@@ -25661,8 +25616,11 @@ var trailingTimeout = 2;
  * @param {number} delay - Delay after which to invoke callback.
  * @returns {Function}
  */
-function throttle (callback, delay) {
-    var leadingCall = false, trailingCall = false, lastCallTime = 0;
+var throttle = function (callback, delay) {
+    var leadingCall = false,
+        trailingCall = false,
+        lastCallTime = 0;
+
     /**
      * Invokes the original callback function and schedules new invocation if
      * the "proxy" was called during current request.
@@ -25672,12 +25630,15 @@ function throttle (callback, delay) {
     function resolvePending() {
         if (leadingCall) {
             leadingCall = false;
+
             callback();
         }
+
         if (trailingCall) {
             proxy();
         }
     }
+
     /**
      * Callback invoked after the specified delay. It will further postpone
      * invocation of the original function delegating it to the
@@ -25688,6 +25649,7 @@ function throttle (callback, delay) {
     function timeoutCallback() {
         requestAnimationFrame$1(resolvePending);
     }
+
     /**
      * Schedules invocation of the original function.
      *
@@ -25695,231 +25657,253 @@ function throttle (callback, delay) {
      */
     function proxy() {
         var timeStamp = Date.now();
+
         if (leadingCall) {
             // Reject immediately following calls.
             if (timeStamp - lastCallTime < trailingTimeout) {
                 return;
             }
+
             // Schedule new call to be in invoked when the pending one is resolved.
             // This is important for "transitions" which never actually start
             // immediately so there is a chance that we might miss one if change
             // happens amids the pending invocation.
             trailingCall = true;
-        }
-        else {
+        } else {
             leadingCall = true;
             trailingCall = false;
+
             setTimeout(timeoutCallback, delay);
         }
+
         lastCallTime = timeStamp;
     }
+
     return proxy;
-}
+};
 
 // Minimum delay before invoking the update of observers.
 var REFRESH_DELAY = 20;
+
 // A list of substrings of CSS properties used to find transition events that
 // might affect dimensions of observed elements.
 var transitionKeys = ['top', 'right', 'bottom', 'left', 'width', 'height', 'size', 'weight'];
+
 // Check if MutationObserver is available.
 var mutationObserverSupported = typeof MutationObserver !== 'undefined';
+
 /**
  * Singleton controller class which handles updates of ResizeObserver instances.
  */
-var ResizeObserverController = /** @class */ (function () {
-    /**
-     * Creates a new instance of ResizeObserverController.
-     *
-     * @private
-     */
-    function ResizeObserverController() {
-        /**
-         * Indicates whether DOM listeners have been added.
-         *
-         * @private {boolean}
-         */
-        this.connected_ = false;
-        /**
-         * Tells that controller has subscribed for Mutation Events.
-         *
-         * @private {boolean}
-         */
-        this.mutationEventsAdded_ = false;
-        /**
-         * Keeps reference to the instance of MutationObserver.
-         *
-         * @private {MutationObserver}
-         */
-        this.mutationsObserver_ = null;
-        /**
-         * A list of connected observers.
-         *
-         * @private {Array<ResizeObserverSPI>}
-         */
-        this.observers_ = [];
-        this.onTransitionEnd_ = this.onTransitionEnd_.bind(this);
-        this.refresh = throttle(this.refresh.bind(this), REFRESH_DELAY);
+var ResizeObserverController = function() {
+    this.connected_ = false;
+    this.mutationEventsAdded_ = false;
+    this.mutationsObserver_ = null;
+    this.observers_ = [];
+
+    this.onTransitionEnd_ = this.onTransitionEnd_.bind(this);
+    this.refresh = throttle(this.refresh.bind(this), REFRESH_DELAY);
+};
+
+/**
+ * Adds observer to observers list.
+ *
+ * @param {ResizeObserverSPI} observer - Observer to be added.
+ * @returns {void}
+ */
+
+
+/**
+ * Holds reference to the controller's instance.
+ *
+ * @private {ResizeObserverController}
+ */
+
+
+/**
+ * Keeps reference to the instance of MutationObserver.
+ *
+ * @private {MutationObserver}
+ */
+
+/**
+ * Indicates whether DOM listeners have been added.
+ *
+ * @private {boolean}
+ */
+ResizeObserverController.prototype.addObserver = function (observer) {
+    if (!~this.observers_.indexOf(observer)) {
+        this.observers_.push(observer);
     }
-    /**
-     * Adds observer to observers list.
-     *
-     * @param {ResizeObserverSPI} observer - Observer to be added.
-     * @returns {void}
-     */
-    ResizeObserverController.prototype.addObserver = function (observer) {
-        if (!~this.observers_.indexOf(observer)) {
-            this.observers_.push(observer);
-        }
-        // Add listeners if they haven't been added yet.
-        if (!this.connected_) {
-            this.connect_();
-        }
-    };
-    /**
-     * Removes observer from observers list.
-     *
-     * @param {ResizeObserverSPI} observer - Observer to be removed.
-     * @returns {void}
-     */
-    ResizeObserverController.prototype.removeObserver = function (observer) {
-        var observers = this.observers_;
-        var index = observers.indexOf(observer);
-        // Remove observer if it's present in registry.
-        if (~index) {
-            observers.splice(index, 1);
-        }
-        // Remove listeners if controller has no connected observers.
-        if (!observers.length && this.connected_) {
-            this.disconnect_();
-        }
-    };
-    /**
-     * Invokes the update of observers. It will continue running updates insofar
-     * it detects changes.
-     *
-     * @returns {void}
-     */
-    ResizeObserverController.prototype.refresh = function () {
-        var changesDetected = this.updateObservers_();
-        // Continue running updates if changes have been detected as there might
-        // be future ones caused by CSS transitions.
-        if (changesDetected) {
-            this.refresh();
-        }
-    };
-    /**
-     * Updates every observer from observers list and notifies them of queued
-     * entries.
-     *
-     * @private
-     * @returns {boolean} Returns "true" if any observer has detected changes in
-     *      dimensions of it's elements.
-     */
-    ResizeObserverController.prototype.updateObservers_ = function () {
-        // Collect observers that have active observations.
-        var activeObservers = this.observers_.filter(function (observer) {
-            return observer.gatherActive(), observer.hasActive();
+
+    // Add listeners if they haven't been added yet.
+    if (!this.connected_) {
+        this.connect_();
+    }
+};
+
+/**
+ * Removes observer from observers list.
+ *
+ * @param {ResizeObserverSPI} observer - Observer to be removed.
+ * @returns {void}
+ */
+ResizeObserverController.prototype.removeObserver = function (observer) {
+    var observers = this.observers_;
+    var index = observers.indexOf(observer);
+
+    // Remove observer if it's present in registry.
+    if (~index) {
+        observers.splice(index, 1);
+    }
+
+    // Remove listeners if controller has no connected observers.
+    if (!observers.length && this.connected_) {
+        this.disconnect_();
+    }
+};
+
+/**
+ * Invokes the update of observers. It will continue running updates insofar
+ * it detects changes.
+ *
+ * @returns {void}
+ */
+ResizeObserverController.prototype.refresh = function () {
+    var changesDetected = this.updateObservers_();
+
+    // Continue running updates if changes have been detected as there might
+    // be future ones caused by CSS transitions.
+    if (changesDetected) {
+        this.refresh();
+    }
+};
+
+/**
+ * Updates every observer from observers list and notifies them of queued
+ * entries.
+ *
+ * @private
+ * @returns {boolean} Returns "true" if any observer has detected changes in
+ *  dimensions of it's elements.
+ */
+ResizeObserverController.prototype.updateObservers_ = function () {
+    // Collect observers that have active observations.
+    var activeObservers = this.observers_.filter(function (observer) {
+        return observer.gatherActive(), observer.hasActive();
+    });
+
+    // Deliver notifications in a separate cycle in order to avoid any
+    // collisions between observers, e.g. when multiple instances of
+    // ResizeObserver are tracking the same element and the callback of one
+    // of them changes content dimensions of the observed target. Sometimes
+    // this may result in notifications being blocked for the rest of observers.
+    activeObservers.forEach(function (observer) { return observer.broadcastActive(); });
+
+    return activeObservers.length > 0;
+};
+
+/**
+ * Initializes DOM listeners.
+ *
+ * @private
+ * @returns {void}
+ */
+ResizeObserverController.prototype.connect_ = function () {
+    // Do nothing if running in a non-browser environment or if listeners
+    // have been already added.
+    if (!isBrowser || this.connected_) {
+        return;
+    }
+
+    // Subscription to the "Transitionend" event is used as a workaround for
+    // delayed transitions. This way it's possible to capture at least the
+    // final state of an element.
+    document.addEventListener('transitionend', this.onTransitionEnd_);
+
+    window.addEventListener('resize', this.refresh);
+
+    if (mutationObserverSupported) {
+        this.mutationsObserver_ = new MutationObserver(this.refresh);
+
+        this.mutationsObserver_.observe(document, {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
         });
-        // Deliver notifications in a separate cycle in order to avoid any
-        // collisions between observers, e.g. when multiple instances of
-        // ResizeObserver are tracking the same element and the callback of one
-        // of them changes content dimensions of the observed target. Sometimes
-        // this may result in notifications being blocked for the rest of observers.
-        activeObservers.forEach(function (observer) { return observer.broadcastActive(); });
-        return activeObservers.length > 0;
-    };
-    /**
-     * Initializes DOM listeners.
-     *
-     * @private
-     * @returns {void}
-     */
-    ResizeObserverController.prototype.connect_ = function () {
-        // Do nothing if running in a non-browser environment or if listeners
-        // have been already added.
-        if (!isBrowser || this.connected_) {
-            return;
-        }
-        // Subscription to the "Transitionend" event is used as a workaround for
-        // delayed transitions. This way it's possible to capture at least the
-        // final state of an element.
-        document.addEventListener('transitionend', this.onTransitionEnd_);
-        window.addEventListener('resize', this.refresh);
-        if (mutationObserverSupported) {
-            this.mutationsObserver_ = new MutationObserver(this.refresh);
-            this.mutationsObserver_.observe(document, {
-                attributes: true,
-                childList: true,
-                characterData: true,
-                subtree: true
-            });
-        }
-        else {
-            document.addEventListener('DOMSubtreeModified', this.refresh);
-            this.mutationEventsAdded_ = true;
-        }
-        this.connected_ = true;
-    };
-    /**
-     * Removes DOM listeners.
-     *
-     * @private
-     * @returns {void}
-     */
-    ResizeObserverController.prototype.disconnect_ = function () {
-        // Do nothing if running in a non-browser environment or if listeners
-        // have been already removed.
-        if (!isBrowser || !this.connected_) {
-            return;
-        }
-        document.removeEventListener('transitionend', this.onTransitionEnd_);
-        window.removeEventListener('resize', this.refresh);
-        if (this.mutationsObserver_) {
-            this.mutationsObserver_.disconnect();
-        }
-        if (this.mutationEventsAdded_) {
-            document.removeEventListener('DOMSubtreeModified', this.refresh);
-        }
-        this.mutationsObserver_ = null;
-        this.mutationEventsAdded_ = false;
-        this.connected_ = false;
-    };
-    /**
-     * "Transitionend" event handler.
-     *
-     * @private
-     * @param {TransitionEvent} event
-     * @returns {void}
-     */
-    ResizeObserverController.prototype.onTransitionEnd_ = function (_a) {
-        var _b = _a.propertyName, propertyName = _b === void 0 ? '' : _b;
-        // Detect whether transition may affect dimensions of an element.
-        var isReflowProperty = transitionKeys.some(function (key) {
-            return !!~propertyName.indexOf(key);
-        });
-        if (isReflowProperty) {
-            this.refresh();
-        }
-    };
-    /**
-     * Returns instance of the ResizeObserverController.
-     *
-     * @returns {ResizeObserverController}
-     */
-    ResizeObserverController.getInstance = function () {
-        if (!this.instance_) {
-            this.instance_ = new ResizeObserverController();
-        }
-        return this.instance_;
-    };
-    /**
-     * Holds reference to the controller's instance.
-     *
-     * @private {ResizeObserverController}
-     */
-    ResizeObserverController.instance_ = null;
-    return ResizeObserverController;
-}());
+    } else {
+        document.addEventListener('DOMSubtreeModified', this.refresh);
+
+        this.mutationEventsAdded_ = true;
+    }
+
+    this.connected_ = true;
+};
+
+/**
+ * Removes DOM listeners.
+ *
+ * @private
+ * @returns {void}
+ */
+ResizeObserverController.prototype.disconnect_ = function () {
+    // Do nothing if running in a non-browser environment or if listeners
+    // have been already removed.
+    if (!isBrowser || !this.connected_) {
+        return;
+    }
+
+    document.removeEventListener('transitionend', this.onTransitionEnd_);
+    window.removeEventListener('resize', this.refresh);
+
+    if (this.mutationsObserver_) {
+        this.mutationsObserver_.disconnect();
+    }
+
+    if (this.mutationEventsAdded_) {
+        document.removeEventListener('DOMSubtreeModified', this.refresh);
+    }
+
+    this.mutationsObserver_ = null;
+    this.mutationEventsAdded_ = false;
+    this.connected_ = false;
+};
+
+/**
+ * "Transitionend" event handler.
+ *
+ * @private
+ * @param {TransitionEvent} event
+ * @returns {void}
+ */
+ResizeObserverController.prototype.onTransitionEnd_ = function (ref) {
+        var propertyName = ref.propertyName; if ( propertyName === void 0 ) propertyName = '';
+
+    // Detect whether transition may affect dimensions of an element.
+    var isReflowProperty = transitionKeys.some(function (key) {
+        return !!~propertyName.indexOf(key);
+    });
+
+    if (isReflowProperty) {
+        this.refresh();
+    }
+};
+
+/**
+ * Returns instance of the ResizeObserverController.
+ *
+ * @returns {ResizeObserverController}
+ */
+ResizeObserverController.getInstance = function () {
+    if (!this.instance_) {
+        this.instance_ = new ResizeObserverController();
+    }
+
+    return this.instance_;
+};
+
+ResizeObserverController.instance_ = null;
 
 /**
  * Defines non-writable/enumerable properties of the provided target object.
@@ -25929,8 +25913,9 @@ var ResizeObserverController = /** @class */ (function () {
  * @returns {Object} Target object.
  */
 var defineConfigurable = (function (target, props) {
-    for (var _i = 0, _a = Object.keys(props); _i < _a.length; _i++) {
-        var key = _a[_i];
+    for (var i = 0, list = Object.keys(props); i < list.length; i += 1) {
+        var key = list[i];
+
         Object.defineProperty(target, key, {
             value: props[key],
             enumerable: false,
@@ -25938,6 +25923,7 @@ var defineConfigurable = (function (target, props) {
             configurable: true
         });
     }
+
     return target;
 });
 
@@ -25952,6 +25938,7 @@ var getWindowOf = (function (target) {
     // has the "ownerDocument" property from which we can retrieve a
     // corresponding global object.
     var ownerGlobal = target && target.ownerDocument && target.ownerDocument.defaultView;
+
     // Return the local global object if it's not possible extract one from
     // provided element.
     return ownerGlobal || global$1;
@@ -25959,6 +25946,7 @@ var getWindowOf = (function (target) {
 
 // Placeholder of an empty content rectangle.
 var emptyRect = createRectInit(0, 0, 0, 0);
+
 /**
  * Converts provided string to a number.
  *
@@ -25968,6 +25956,7 @@ var emptyRect = createRectInit(0, 0, 0, 0);
 function toFloat(value) {
     return parseFloat(value) || 0;
 }
+
 /**
  * Extracts borders size from provided styles.
  *
@@ -25976,15 +25965,16 @@ function toFloat(value) {
  * @returns {number}
  */
 function getBordersSize(styles) {
-    var positions = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        positions[_i - 1] = arguments[_i];
-    }
+    var positions = [], len = arguments.length - 1;
+    while ( len-- > 0 ) positions[ len ] = arguments[ len + 1 ];
+
     return positions.reduce(function (size, position) {
         var value = styles['border-' + position + '-width'];
+
         return size + toFloat(value);
     }, 0);
 }
+
 /**
  * Extracts paddings sizes from provided styles.
  *
@@ -25994,13 +25984,18 @@ function getBordersSize(styles) {
 function getPaddings(styles) {
     var positions = ['top', 'right', 'bottom', 'left'];
     var paddings = {};
-    for (var _i = 0, positions_1 = positions; _i < positions_1.length; _i++) {
-        var position = positions_1[_i];
+
+    for (var i = 0, list = positions; i < list.length; i += 1) {
+        var position = list[i];
+
         var value = styles['padding-' + position];
+
         paddings[position] = toFloat(value);
     }
+
     return paddings;
 }
+
 /**
  * Calculates content rectangle of provided SVG element.
  *
@@ -26010,8 +26005,10 @@ function getPaddings(styles) {
  */
 function getSVGContentRect(target) {
     var bbox = target.getBBox();
+
     return createRectInit(0, 0, bbox.width, bbox.height);
 }
+
 /**
  * Calculates content rectangle of provided HTMLElement.
  *
@@ -26021,7 +26018,9 @@ function getSVGContentRect(target) {
 function getHTMLElementContentRect(target) {
     // Client width & height properties can't be
     // used exclusively as they provide rounded values.
-    var clientWidth = target.clientWidth, clientHeight = target.clientHeight;
+    var clientWidth = target.clientWidth;
+    var clientHeight = target.clientHeight;
+
     // By this condition we can catch all non-replaced inline, hidden and
     // detached elements. Though elements with width & height properties less
     // than 0.5 will be discarded as well.
@@ -26033,15 +26032,19 @@ function getHTMLElementContentRect(target) {
     if (!clientWidth && !clientHeight) {
         return emptyRect;
     }
+
     var styles = getWindowOf(target).getComputedStyle(target);
     var paddings = getPaddings(styles);
     var horizPad = paddings.left + paddings.right;
     var vertPad = paddings.top + paddings.bottom;
+
     // Computed styles of width & height are being used because they are the
     // only dimensions available to JS that contain non-rounded values. It could
     // be possible to utilize the getBoundingClientRect if only it's data wasn't
     // affected by CSS transformations let alone paddings, borders and scroll bars.
-    var width = toFloat(styles.width), height = toFloat(styles.height);
+    var width = toFloat(styles.width),
+        height = toFloat(styles.height);
+
     // Width & height include paddings and borders when the 'border-box' box
     // model is applied (except for IE).
     if (styles.boxSizing === 'border-box') {
@@ -26054,10 +26057,12 @@ function getHTMLElementContentRect(target) {
         if (Math.round(width + horizPad) !== clientWidth) {
             width -= getBordersSize(styles, 'left', 'right') + horizPad;
         }
+
         if (Math.round(height + vertPad) !== clientHeight) {
             height -= getBordersSize(styles, 'top', 'bottom') + vertPad;
         }
     }
+
     // Following steps can't be applied to the document's root element as its
     // client[Width/Height] properties represent viewport area of the window.
     // Besides, it's as well not necessary as the <html> itself neither has
@@ -26069,6 +26074,7 @@ function getHTMLElementContentRect(target) {
         // and "client" properties, though that is not always true in Chrome.
         var vertScrollbar = Math.round(width + horizPad) - clientWidth;
         var horizScrollbar = Math.round(height + vertPad) - clientHeight;
+
         // Chrome has a rather weird rounding of "client" properties.
         // E.g. for an element with content width of 314.2px it sometimes gives
         // the client width of 315px and for the width of 314.7px it may give
@@ -26077,12 +26083,15 @@ function getHTMLElementContentRect(target) {
         if (Math.abs(vertScrollbar) !== 1) {
             width -= vertScrollbar;
         }
+
         if (Math.abs(horizScrollbar) !== 1) {
             height -= horizScrollbar;
         }
     }
+
     return createRectInit(paddings.left, paddings.top, width, height);
 }
+
 /**
  * Checks whether provided element is an instance of the SVGGraphicsElement.
  *
@@ -26095,12 +26104,13 @@ var isSVGGraphicsElement = (function () {
     if (typeof SVGGraphicsElement !== 'undefined') {
         return function (target) { return target instanceof getWindowOf(target).SVGGraphicsElement; };
     }
+
     // If it's so, then check that element is at least an instance of the
     // SVGElement and that it has the "getBBox" method.
     // eslint-disable-next-line no-extra-parens
-    return function (target) { return (target instanceof getWindowOf(target).SVGElement &&
-        typeof target.getBBox === 'function'); };
+    return function (target) { return target instanceof getWindowOf(target).SVGElement && typeof target.getBBox === 'function'; };
 })();
+
 /**
  * Checks whether provided element is a document element (<html>).
  *
@@ -26110,6 +26120,7 @@ var isSVGGraphicsElement = (function () {
 function isDocumentElement(target) {
     return target === getWindowOf(target).document.documentElement;
 }
+
 /**
  * Calculates an appropriate content rectangle for provided html or svg element.
  *
@@ -26120,11 +26131,14 @@ function getContentRect(target) {
     if (!isBrowser) {
         return emptyRect;
     }
+
     if (isSVGGraphicsElement(target)) {
         return getSVGContentRect(target);
     }
+
     return getHTMLElementContentRect(target);
 }
+
 /**
  * Creates rectangle with an interface of the DOMRectReadOnly.
  * Spec: https://drafts.fxtf.org/geometry/#domrectreadonly
@@ -26132,11 +26146,16 @@ function getContentRect(target) {
  * @param {DOMRectInit} rectInit - Object with rectangle's x/y coordinates and dimensions.
  * @returns {DOMRectReadOnly}
  */
-function createReadOnlyRect(_a) {
-    var x = _a.x, y = _a.y, width = _a.width, height = _a.height;
+function createReadOnlyRect(ref) {
+    var x = ref.x;
+    var y = ref.y;
+    var width = ref.width;
+    var height = ref.height;
+
     // If DOMRectReadOnly is available use it as a prototype for the rectangle.
     var Constr = typeof DOMRectReadOnly !== 'undefined' ? DOMRectReadOnly : Object;
     var rect = Object.create(Constr.prototype);
+
     // Rectangle's properties are not writable and non-enumerable.
     defineConfigurable(rect, {
         x: x, y: y, width: width, height: height,
@@ -26145,8 +26164,10 @@ function createReadOnlyRect(_a) {
         bottom: height + y,
         left: x
     });
+
     return rect;
 }
+
 /**
  * Creates DOMRectInit object based on the provided dimensions and the x/y coordinates.
  * Spec: https://drafts.fxtf.org/geometry/#dictdef-domrectinit
@@ -26165,266 +26186,271 @@ function createRectInit(x, y, width, height) {
  * Class that is responsible for computations of the content rectangle of
  * provided DOM element and for keeping track of it's changes.
  */
-var ResizeObservation = /** @class */ (function () {
-    /**
-     * Creates an instance of ResizeObservation.
-     *
-     * @param {Element} target - Element to be observed.
-     */
-    function ResizeObservation(target) {
-        /**
-         * Broadcasted width of content rectangle.
-         *
-         * @type {number}
-         */
-        this.broadcastWidth = 0;
-        /**
-         * Broadcasted height of content rectangle.
-         *
-         * @type {number}
-         */
-        this.broadcastHeight = 0;
-        /**
-         * Reference to the last observed content rectangle.
-         *
-         * @private {DOMRectInit}
-         */
-        this.contentRect_ = createRectInit(0, 0, 0, 0);
-        this.target = target;
-    }
-    /**
-     * Updates content rectangle and tells whether it's width or height properties
-     * have changed since the last broadcast.
-     *
-     * @returns {boolean}
-     */
-    ResizeObservation.prototype.isActive = function () {
-        var rect = getContentRect(this.target);
-        this.contentRect_ = rect;
-        return (rect.width !== this.broadcastWidth ||
-            rect.height !== this.broadcastHeight);
-    };
-    /**
-     * Updates 'broadcastWidth' and 'broadcastHeight' properties with a data
-     * from the corresponding properties of the last observed content rectangle.
-     *
-     * @returns {DOMRectInit} Last observed content rectangle.
-     */
-    ResizeObservation.prototype.broadcastRect = function () {
-        var rect = this.contentRect_;
-        this.broadcastWidth = rect.width;
-        this.broadcastHeight = rect.height;
-        return rect;
-    };
-    return ResizeObservation;
-}());
+var ResizeObservation = function(target) {
+    this.broadcastWidth = 0;
+    this.broadcastHeight = 0;
+    this.contentRect_ = createRectInit(0, 0, 0, 0);
 
-var ResizeObserverEntry = /** @class */ (function () {
-    /**
-     * Creates an instance of ResizeObserverEntry.
-     *
-     * @param {Element} target - Element that is being observed.
-     * @param {DOMRectInit} rectInit - Data of the element's content rectangle.
-     */
-    function ResizeObserverEntry(target, rectInit) {
-        var contentRect = createReadOnlyRect(rectInit);
-        // According to the specification following properties are not writable
-        // and are also not enumerable in the native implementation.
-        //
-        // Property accessors are not being used as they'd require to define a
-        // private WeakMap storage which may cause memory leaks in browsers that
-        // don't support this type of collections.
-        defineConfigurable(this, { target: target, contentRect: contentRect });
-    }
-    return ResizeObserverEntry;
-}());
+    this.target = target;
+};
 
-var ResizeObserverSPI = /** @class */ (function () {
-    /**
-     * Creates a new instance of ResizeObserver.
-     *
-     * @param {ResizeObserverCallback} callback - Callback function that is invoked
-     *      when one of the observed elements changes it's content dimensions.
-     * @param {ResizeObserverController} controller - Controller instance which
-     *      is responsible for the updates of observer.
-     * @param {ResizeObserver} callbackCtx - Reference to the public
-     *      ResizeObserver instance which will be passed to callback function.
-     */
-    function ResizeObserverSPI(callback, controller, callbackCtx) {
-        /**
-         * Collection of resize observations that have detected changes in dimensions
-         * of elements.
-         *
-         * @private {Array<ResizeObservation>}
-         */
-        this.activeObservations_ = [];
-        /**
-         * Registry of the ResizeObservation instances.
-         *
-         * @private {Map<Element, ResizeObservation>}
-         */
-        this.observations_ = new MapShim();
-        if (typeof callback !== 'function') {
-            throw new TypeError('The callback provided as parameter 1 is not a function.');
-        }
-        this.callback_ = callback;
-        this.controller_ = controller;
-        this.callbackCtx_ = callbackCtx;
+/**
+ * Updates content rectangle and tells whether it's width or height properties
+ * have changed since the last broadcast.
+ *
+ * @returns {boolean}
+ */
+
+
+/**
+ * Reference to the last observed content rectangle.
+ *
+ * @private {DOMRectInit}
+ */
+
+
+/**
+ * Broadcasted width of content rectangle.
+ *
+ * @type {number}
+ */
+ResizeObservation.prototype.isActive = function () {
+    var rect = getContentRect(this.target);
+
+    this.contentRect_ = rect;
+
+    return rect.width !== this.broadcastWidth || rect.height !== this.broadcastHeight;
+};
+
+/**
+ * Updates 'broadcastWidth' and 'broadcastHeight' properties with a data
+ * from the corresponding properties of the last observed content rectangle.
+ *
+ * @returns {DOMRectInit} Last observed content rectangle.
+ */
+ResizeObservation.prototype.broadcastRect = function () {
+    var rect = this.contentRect_;
+
+    this.broadcastWidth = rect.width;
+    this.broadcastHeight = rect.height;
+
+    return rect;
+};
+
+var ResizeObserverEntry = function(target, rectInit) {
+    var contentRect = createReadOnlyRect(rectInit);
+
+    // According to the specification following properties are not writable
+    // and are also not enumerable in the native implementation.
+    //
+    // Property accessors are not being used as they'd require to define a
+    // private WeakMap storage which may cause memory leaks in browsers that
+    // don't support this type of collections.
+    defineConfigurable(this, { target: target, contentRect: contentRect });
+};
+
+var ResizeObserverSPI = function(callback, controller, callbackCtx) {
+    this.activeObservations_ = [];
+    this.observations_ = new MapShim();
+
+    if (typeof callback !== 'function') {
+        throw new TypeError('The callback provided as parameter 1 is not a function.');
     }
-    /**
-     * Starts observing provided element.
-     *
-     * @param {Element} target - Element to be observed.
-     * @returns {void}
-     */
-    ResizeObserverSPI.prototype.observe = function (target) {
-        if (!arguments.length) {
-            throw new TypeError('1 argument required, but only 0 present.');
-        }
-        // Do nothing if current environment doesn't have the Element interface.
-        if (typeof Element === 'undefined' || !(Element instanceof Object)) {
-            return;
-        }
-        if (!(target instanceof getWindowOf(target).Element)) {
-            throw new TypeError('parameter 1 is not of type "Element".');
-        }
-        var observations = this.observations_;
-        // Do nothing if element is already being observed.
-        if (observations.has(target)) {
-            return;
-        }
-        observations.set(target, new ResizeObservation(target));
-        this.controller_.addObserver(this);
-        // Force the update of observations.
-        this.controller_.refresh();
-    };
-    /**
-     * Stops observing provided element.
-     *
-     * @param {Element} target - Element to stop observing.
-     * @returns {void}
-     */
-    ResizeObserverSPI.prototype.unobserve = function (target) {
-        if (!arguments.length) {
-            throw new TypeError('1 argument required, but only 0 present.');
-        }
-        // Do nothing if current environment doesn't have the Element interface.
-        if (typeof Element === 'undefined' || !(Element instanceof Object)) {
-            return;
-        }
-        if (!(target instanceof getWindowOf(target).Element)) {
-            throw new TypeError('parameter 1 is not of type "Element".');
-        }
-        var observations = this.observations_;
-        // Do nothing if element is not being observed.
-        if (!observations.has(target)) {
-            return;
-        }
-        observations.delete(target);
-        if (!observations.size) {
-            this.controller_.removeObserver(this);
-        }
-    };
-    /**
-     * Stops observing all elements.
-     *
-     * @returns {void}
-     */
-    ResizeObserverSPI.prototype.disconnect = function () {
-        this.clearActive();
-        this.observations_.clear();
+
+    this.callback_ = callback;
+    this.controller_ = controller;
+    this.callbackCtx_ = callbackCtx;
+};
+
+/**
+ * Starts observing provided element.
+ *
+ * @param {Element} target - Element to be observed.
+ * @returns {void}
+ */
+
+
+/**
+ * Registry of the ResizeObservation instances.
+ *
+ * @private {Map<Element, ResizeObservation>}
+ */
+
+
+/**
+ * Public ResizeObserver instance which will be passed to the callback
+ * function and used as a value of it's "this" binding.
+ *
+ * @private {ResizeObserver}
+ */
+
+/**
+ * Collection of resize observations that have detected changes in dimensions
+ * of elements.
+ *
+ * @private {Array<ResizeObservation>}
+ */
+ResizeObserverSPI.prototype.observe = function (target) {
+    if (!arguments.length) {
+        throw new TypeError('1 argument required, but only 0 present.');
+    }
+
+    // Do nothing if current environment doesn't have the Element interface.
+    if (typeof Element === 'undefined' || !(Element instanceof Object)) {
+        return;
+    }
+
+    if (!(target instanceof getWindowOf(target).Element)) {
+        throw new TypeError('parameter 1 is not of type "Element".');
+    }
+
+    var observations = this.observations_;
+
+    // Do nothing if element is already being observed.
+    if (observations.has(target)) {
+        return;
+    }
+
+    observations.set(target, new ResizeObservation(target));
+
+    this.controller_.addObserver(this);
+
+    // Force the update of observations.
+    this.controller_.refresh();
+};
+
+/**
+ * Stops observing provided element.
+ *
+ * @param {Element} target - Element to stop observing.
+ * @returns {void}
+ */
+ResizeObserverSPI.prototype.unobserve = function (target) {
+    if (!arguments.length) {
+        throw new TypeError('1 argument required, but only 0 present.');
+    }
+
+    // Do nothing if current environment doesn't have the Element interface.
+    if (typeof Element === 'undefined' || !(Element instanceof Object)) {
+        return;
+    }
+
+    if (!(target instanceof getWindowOf(target).Element)) {
+        throw new TypeError('parameter 1 is not of type "Element".');
+    }
+
+    var observations = this.observations_;
+
+    // Do nothing if element is not being observed.
+    if (!observations.has(target)) {
+        return;
+    }
+
+    observations.delete(target);
+
+    if (!observations.size) {
         this.controller_.removeObserver(this);
-    };
-    /**
-     * Collects observation instances the associated element of which has changed
-     * it's content rectangle.
-     *
-     * @returns {void}
-     */
-    ResizeObserverSPI.prototype.gatherActive = function () {
-        var _this = this;
-        this.clearActive();
-        this.observations_.forEach(function (observation) {
-            if (observation.isActive()) {
-                _this.activeObservations_.push(observation);
-            }
-        });
-    };
-    /**
-     * Invokes initial callback function with a list of ResizeObserverEntry
-     * instances collected from active resize observations.
-     *
-     * @returns {void}
-     */
-    ResizeObserverSPI.prototype.broadcastActive = function () {
-        // Do nothing if observer doesn't have active observations.
-        if (!this.hasActive()) {
-            return;
+    }
+};
+
+/**
+ * Stops observing all elements.
+ *
+ * @returns {void}
+ */
+ResizeObserverSPI.prototype.disconnect = function () {
+    this.clearActive();
+    this.observations_.clear();
+    this.controller_.removeObserver(this);
+};
+
+/**
+ * Collects observation instances the associated element of which has changed
+ * it's content rectangle.
+ *
+ * @returns {void}
+ */
+ResizeObserverSPI.prototype.gatherActive = function () {
+        var this$1 = this;
+
+    this.clearActive();
+
+    this.observations_.forEach(function (observation) {
+        if (observation.isActive()) {
+            this$1.activeObservations_.push(observation);
         }
-        var ctx = this.callbackCtx_;
-        // Create ResizeObserverEntry instance for every active observation.
-        var entries = this.activeObservations_.map(function (observation) {
-            return new ResizeObserverEntry(observation.target, observation.broadcastRect());
-        });
-        this.callback_.call(ctx, entries, ctx);
-        this.clearActive();
-    };
-    /**
-     * Clears the collection of active observations.
-     *
-     * @returns {void}
-     */
-    ResizeObserverSPI.prototype.clearActive = function () {
-        this.activeObservations_.splice(0);
-    };
-    /**
-     * Tells whether observer has active observations.
-     *
-     * @returns {boolean}
-     */
-    ResizeObserverSPI.prototype.hasActive = function () {
-        return this.activeObservations_.length > 0;
-    };
-    return ResizeObserverSPI;
-}());
+    });
+};
+
+/**
+ * Invokes initial callback function with a list of ResizeObserverEntry
+ * instances collected from active resize observations.
+ *
+ * @returns {void}
+ */
+ResizeObserverSPI.prototype.broadcastActive = function () {
+    // Do nothing if observer doesn't have active observations.
+    if (!this.hasActive()) {
+        return;
+    }
+
+    var ctx = this.callbackCtx_;
+
+    // Create ResizeObserverEntry instance for every active observation.
+    var entries = this.activeObservations_.map(function (observation) {
+        return new ResizeObserverEntry(observation.target, observation.broadcastRect());
+    });
+
+    this.callback_.call(ctx, entries, ctx);
+    this.clearActive();
+};
+
+/**
+ * Clears the collection of active observations.
+ *
+ * @returns {void}
+ */
+ResizeObserverSPI.prototype.clearActive = function () {
+    this.activeObservations_.splice(0);
+};
+
+/**
+ * Tells whether observer has active observations.
+ *
+ * @returns {boolean}
+ */
+ResizeObserverSPI.prototype.hasActive = function () {
+    return this.activeObservations_.length > 0;
+};
 
 // Registry of internal observers. If WeakMap is not available use current shim
 // for the Map collection as it has all required methods and because WeakMap
 // can't be fully polyfilled anyway.
 var observers = typeof WeakMap !== 'undefined' ? new WeakMap() : new MapShim();
+
 /**
  * ResizeObserver API. Encapsulates the ResizeObserver SPI implementation
  * exposing only those methods and properties that are defined in the spec.
  */
-var ResizeObserver = /** @class */ (function () {
-    /**
-     * Creates a new instance of ResizeObserver.
-     *
-     * @param {ResizeObserverCallback} callback - Callback that is invoked when
-     *      dimensions of the observed elements change.
-     */
-    function ResizeObserver(callback) {
-        if (!(this instanceof ResizeObserver)) {
-            throw new TypeError('Cannot call a class as a function.');
-        }
-        if (!arguments.length) {
-            throw new TypeError('1 argument required, but only 0 present.');
-        }
-        var controller = ResizeObserverController.getInstance();
-        var observer = new ResizeObserverSPI(callback, controller, this);
-        observers.set(this, observer);
+var ResizeObserver = function(callback) {
+    if (!(this instanceof ResizeObserver)) {
+        throw new TypeError('Cannot call a class as a function.');
     }
-    return ResizeObserver;
-}());
+    if (!arguments.length) {
+        throw new TypeError('1 argument required, but only 0 present.');
+    }
+
+    var controller = ResizeObserverController.getInstance();
+    var observer = new ResizeObserverSPI(callback, controller, this);
+
+    observers.set(this, observer);
+};
+
 // Expose public methods of ResizeObserver.
-[
-    'observe',
-    'unobserve',
-    'disconnect'
-].forEach(function (method) {
+['observe', 'unobserve', 'disconnect'].forEach(function (method) {
     ResizeObserver.prototype[method] = function () {
-        var _a;
-        return (_a = observers.get(this))[method].apply(_a, arguments);
+        return (ref = observers.get(this))[method].apply(ref, arguments);
+        var ref;
     };
 });
 
@@ -26433,12 +26459,13 @@ var index = (function () {
     if (typeof global$1.ResizeObserver !== 'undefined') {
         return global$1.ResizeObserver;
     }
+
     return ResizeObserver;
 })();
 
 /* harmony default export */ __webpack_exports__["default"] = (index);
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(12)))
 
 /***/ }),
 /* 96 */
@@ -30676,7 +30703,7 @@ exports.default = HR;
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _commandManager = __webpack_require__(2);
@@ -30706,41 +30733,41 @@ var decodeURIGraceful = _importManager2.default.decodeURIGraceful,
  */
 
 var AddLink = _commandManager2.default.command('markdown', /** @lends AddLink */{
-    name: 'AddLink',
-    /**
-     * command handler for AddLink
-     * @param {MarkdownEditor} mde - MarkdownEditor instance
-     * @param {object} data - data for image
-     */
-    exec: function exec(mde, data) {
-        var cm = mde.getEditor();
-        var doc = cm.getDoc();
+  name: 'AddLink',
+  /**
+   * command handler for AddLink
+   * @param {MarkdownEditor} mde - MarkdownEditor instance
+   * @param {object} data - data for image
+   */
+  exec: function exec(mde, data) {
+    var cm = mde.getEditor();
+    var doc = cm.getDoc();
 
-        var range = mde.getCurrentRange();
+    var range = mde.getCurrentRange();
 
-        var from = {
-            line: range.from.line,
-            ch: range.from.ch
-        };
+    var from = {
+      line: range.from.line,
+      ch: range.from.ch
+    };
 
-        var to = {
-            line: range.to.line,
-            ch: range.to.ch
-        };
+    var to = {
+      line: range.to.line,
+      ch: range.to.ch
+    };
 
-        var linkText = data.linkText,
-            url = data.url;
+    var linkText = data.linkText,
+        url = data.url;
 
-        linkText = decodeURIGraceful(linkText);
-        linkText = escapeMarkdownCharacters(linkText);
-        url = encodeMarkdownCharacters(url);
+    linkText = decodeURIGraceful(linkText);
+    linkText = escapeMarkdownCharacters(linkText);
+    url = encodeMarkdownCharacters(url);
 
-        var replaceText = '[' + linkText + '](' + url + ')';
+    var replaceText = '[' + linkText + '](' + url + ')';
 
-        doc.replaceRange(replaceText, from, to);
+    doc.replaceRange(replaceText, from, to);
 
-        cm.focus();
-    }
+    cm.focus();
+  }
 });
 
 exports.default = AddLink;
@@ -30753,7 +30780,7 @@ exports.default = AddLink;
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _commandManager = __webpack_require__(2);
@@ -30783,40 +30810,40 @@ var decodeURIGraceful = _importManager2.default.decodeURIGraceful,
  */
 
 var AddImage = _commandManager2.default.command('markdown', /** @lends AddImage */{
-    name: 'AddImage',
-    /**
-     * Command Handler
-     * @param {MarkdownEditor} mde MarkdownEditor instance
-     * @param {object} data data for image
-     */
-    exec: function exec(mde, data) {
-        var cm = mde.getEditor();
-        var doc = cm.getDoc();
+  name: 'AddImage',
+  /**
+   * Command Handler
+   * @param {MarkdownEditor} mde MarkdownEditor instance
+   * @param {object} data data for image
+   */
+  exec: function exec(mde, data) {
+    var cm = mde.getEditor();
+    var doc = cm.getDoc();
 
-        var range = mde.getCurrentRange();
+    var range = mde.getCurrentRange();
 
-        var from = {
-            line: range.from.line,
-            ch: range.from.ch
-        };
+    var from = {
+      line: range.from.line,
+      ch: range.from.ch
+    };
 
-        var to = {
-            line: range.to.line,
-            ch: range.to.ch
-        };
+    var to = {
+      line: range.to.line,
+      ch: range.to.ch
+    };
 
-        var altText = data.altText,
-            imageUrl = data.imageUrl;
+    var altText = data.altText,
+        imageUrl = data.imageUrl;
 
-        altText = decodeURIGraceful(altText);
-        altText = escapeMarkdownCharacters(altText);
-        imageUrl = encodeMarkdownCharacters(imageUrl);
-        var replaceText = '![' + altText + '](' + imageUrl + ')';
+    altText = decodeURIGraceful(altText);
+    altText = escapeMarkdownCharacters(altText);
+    imageUrl = encodeMarkdownCharacters(imageUrl);
+    var replaceText = '![' + altText + '](' + imageUrl + ')';
 
-        doc.replaceRange(replaceText, from, to, '+addImage');
+    doc.replaceRange(replaceText, from, to, '+addImage');
 
-        cm.focus();
-    }
+    cm.focus();
+  }
 });
 
 exports.default = AddImage;
@@ -33218,7 +33245,7 @@ exports.default = TableRemove;
 
 
 Object.defineProperty(exports, "__esModule", {
-      value: true
+  value: true
 });
 
 var _jquery = __webpack_require__(0);
@@ -33243,45 +33270,45 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @author NHN Ent. FE Development Lab <dl_javascript@nhnent.com>
  */
 var Indent = _commandManager2.default.command('wysiwyg', /** @lends Indent */{
-      name: 'Indent',
-      /**
-       * Command Handler
-       * @param {WysiwygEditor} wwe wysiwygEditor instance
-       */
-      exec: function exec(wwe) {
-            var listManager = wwe.componentManager.getManager('list');
-            var range = wwe.getEditor().getSelection();
-            var $node = (0, _jquery2.default)(range.startContainer).closest('li');
-            var prevClasses = void 0,
-                nodeClasses = void 0,
-                nextClasses = void 0;
+  name: 'Indent',
+  /**
+   * Command Handler
+   * @param {WysiwygEditor} wwe wysiwygEditor instance
+   */
+  exec: function exec(wwe) {
+    var listManager = wwe.componentManager.getManager('list');
+    var range = wwe.getEditor().getSelection();
+    var $node = (0, _jquery2.default)(range.startContainer).closest('li');
+    var prevClasses = void 0,
+        nodeClasses = void 0,
+        nextClasses = void 0;
 
-            var $prev = $node.prev();
+    var $prev = $node.prev();
 
-            if ($prev.length && $node.length) {
-                  var $next = $node.find('li').eq(0);
+    if ($prev.length && $node.length) {
+      var $next = $node.find('li').eq(0);
 
-                  wwe.getEditor().saveUndoState();
+      wwe.getEditor().saveUndoState();
 
-                  nodeClasses = $node.attr('class');
-                  prevClasses = $prev.attr('class');
-                  nextClasses = $next.attr('class');
+      nodeClasses = $node.attr('class');
+      prevClasses = $prev.attr('class');
+      nextClasses = $next.attr('class');
 
-                  $node.removeAttr('class');
-                  $prev.removeAttr('class');
+      $node.removeAttr('class');
+      $prev.removeAttr('class');
 
-                  if ($next.length && !$next.children('div').length) {
-                        $next.removeAttr('class');
-                  }
-
-                  wwe.getEditor().increaseListLevel();
-                  listManager.mergeList($node.get(0));
-
-                  $node.attr('class', nodeClasses);
-                  $prev.attr('class', prevClasses);
-                  $next.attr('class', nextClasses);
-            }
+      if ($next.length && !$next.children('div').length) {
+        $next.removeAttr('class');
       }
+
+      wwe.getEditor().increaseListLevel();
+      listManager.mergeList($node.get(0));
+
+      $node.attr('class', nodeClasses);
+      $prev.attr('class', prevClasses);
+      $next.attr('class', nextClasses);
+    }
+  }
 });
 
 exports.default = Indent;
@@ -34900,7 +34927,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
 
     CSV.stream.json = function () {
-        var os = __webpack_require__(179);
+        var os = __webpack_require__(178);
         var stream = __webpack_require__(47);
         var s = new streamTransform({ objectMode: true });
         s._transform = function (chunk, encoding, done) {
@@ -35055,102 +35082,68 @@ for (var i = 0, len = code.length; i < len; ++i) {
   revLookup[code.charCodeAt(i)] = i
 }
 
-// Support decoding URL-safe base64 strings, as Node.js does.
-// See: https://en.wikipedia.org/wiki/Base64#URL_applications
 revLookup['-'.charCodeAt(0)] = 62
 revLookup['_'.charCodeAt(0)] = 63
 
-function getLens (b64) {
+function placeHoldersCount (b64) {
   var len = b64.length
-
   if (len % 4 > 0) {
     throw new Error('Invalid string. Length must be a multiple of 4')
   }
 
-  // Trim off extra bytes after placeholder bytes are found
-  // See: https://github.com/beatgammit/base64-js/issues/42
-  var validLen = b64.indexOf('=')
-  if (validLen === -1) validLen = len
-
-  var placeHoldersLen = validLen === len
-    ? 0
-    : 4 - (validLen % 4)
-
-  return [validLen, placeHoldersLen]
+  // the number of equal signs (place holders)
+  // if there are two placeholders, than the two characters before it
+  // represent one byte
+  // if there is only one, then the three characters before it represent 2 bytes
+  // this is just a cheap hack to not do indexOf twice
+  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
 }
 
-// base64 is 4/3 + up to two characters of the original data
 function byteLength (b64) {
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
-
-function _byteLength (b64, validLen, placeHoldersLen) {
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+  // base64 is 4/3 + up to two characters of the original data
+  return (b64.length * 3 / 4) - placeHoldersCount(b64)
 }
 
 function toByteArray (b64) {
-  var tmp
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
+  var i, l, tmp, placeHolders, arr
+  var len = b64.length
+  placeHolders = placeHoldersCount(b64)
 
-  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen))
-
-  var curByte = 0
+  arr = new Arr((len * 3 / 4) - placeHolders)
 
   // if there are placeholders, only get up to the last complete 4 chars
-  var len = placeHoldersLen > 0
-    ? validLen - 4
-    : validLen
+  l = placeHolders > 0 ? len - 4 : len
 
-  for (var i = 0; i < len; i += 4) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 18) |
-      (revLookup[b64.charCodeAt(i + 1)] << 12) |
-      (revLookup[b64.charCodeAt(i + 2)] << 6) |
-      revLookup[b64.charCodeAt(i + 3)]
-    arr[curByte++] = (tmp >> 16) & 0xFF
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
+  var L = 0
+
+  for (i = 0; i < l; i += 4) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
+    arr[L++] = (tmp >> 16) & 0xFF
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
   }
 
-  if (placeHoldersLen === 2) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 2) |
-      (revLookup[b64.charCodeAt(i + 1)] >> 4)
-    arr[curByte++] = tmp & 0xFF
-  }
-
-  if (placeHoldersLen === 1) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 10) |
-      (revLookup[b64.charCodeAt(i + 1)] << 4) |
-      (revLookup[b64.charCodeAt(i + 2)] >> 2)
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
+  if (placeHolders === 2) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
+    arr[L++] = tmp & 0xFF
+  } else if (placeHolders === 1) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
   }
 
   return arr
 }
 
 function tripletToBase64 (num) {
-  return lookup[num >> 18 & 0x3F] +
-    lookup[num >> 12 & 0x3F] +
-    lookup[num >> 6 & 0x3F] +
-    lookup[num & 0x3F]
+  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
 }
 
 function encodeChunk (uint8, start, end) {
   var tmp
   var output = []
   for (var i = start; i < end; i += 3) {
-    tmp =
-      ((uint8[i] << 16) & 0xFF0000) +
-      ((uint8[i + 1] << 8) & 0xFF00) +
-      (uint8[i + 2] & 0xFF)
+    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
     output.push(tripletToBase64(tmp))
   }
   return output.join('')
@@ -35160,33 +35153,30 @@ function fromByteArray (uint8) {
   var tmp
   var len = uint8.length
   var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
+  var output = ''
   var parts = []
   var maxChunkLength = 16383 // must be multiple of 3
 
   // go through the array every three bytes, we'll deal with trailing stuff later
   for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(
-      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
-    ))
+    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
   }
 
   // pad the end with zeros, but make sure to not forget the extra bytes
   if (extraBytes === 1) {
     tmp = uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 2] +
-      lookup[(tmp << 4) & 0x3F] +
-      '=='
-    )
+    output += lookup[tmp >> 2]
+    output += lookup[(tmp << 4) & 0x3F]
+    output += '=='
   } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 10] +
-      lookup[(tmp >> 4) & 0x3F] +
-      lookup[(tmp << 2) & 0x3F] +
-      '='
-    )
+    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
+    output += lookup[tmp >> 10]
+    output += lookup[(tmp >> 4) & 0x3F]
+    output += lookup[(tmp << 2) & 0x3F]
+    output += '='
   }
+
+  parts.push(output)
 
   return parts.join('')
 }
@@ -35198,7 +35188,7 @@ function fromByteArray (uint8) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
-  var eLen = (nBytes * 8) - mLen - 1
+  var eLen = nBytes * 8 - mLen - 1
   var eMax = (1 << eLen) - 1
   var eBias = eMax >> 1
   var nBits = -7
@@ -35211,12 +35201,12 @@ exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   e = s & ((1 << (-nBits)) - 1)
   s >>= (-nBits)
   nBits += eLen
-  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
   m = e & ((1 << (-nBits)) - 1)
   e >>= (-nBits)
   nBits += mLen
-  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
     e = 1 - eBias
@@ -35231,7 +35221,7 @@ exports.read = function (buffer, offset, isLE, mLen, nBytes) {
 
 exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   var e, m, c
-  var eLen = (nBytes * 8) - mLen - 1
+  var eLen = nBytes * 8 - mLen - 1
   var eMax = (1 << eLen) - 1
   var eBias = eMax >> 1
   var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
@@ -35264,7 +35254,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       m = 0
       e = eMax
     } else if (e + eBias >= 1) {
-      m = ((value * c) - 1) * Math.pow(2, mLen)
+      m = (value * c - 1) * Math.pow(2, mLen)
       e = e + eBias
     } else {
       m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
@@ -35295,10 +35285,12 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 "use strict";
 
 
+/*<replacement>*/
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Buffer = __webpack_require__(20).Buffer;
-var util = __webpack_require__(170);
+/*</replacement>*/
 
 function copyBuffer(src, target, offset) {
   src.copy(target, offset);
@@ -35366,35 +35358,19 @@ module.exports = function () {
   return BufferList;
 }();
 
-if (util && util.inspect && util.inspect.custom) {
-  module.exports.prototype[util.inspect.custom] = function () {
-    var obj = util.inspect({ length: this.length });
-    return this.constructor.name + ' ' + obj;
-  };
-}
-
 /***/ }),
 /* 170 */
-/***/ (function(module, exports) {
-
-/* (ignored) */
-
-/***/ }),
-/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
-            (typeof self !== "undefined" && self) ||
-            window;
 var apply = Function.prototype.apply;
 
 // DOM APIs, for completeness
 
 exports.setTimeout = function() {
-  return new Timeout(apply.call(setTimeout, scope, arguments), clearTimeout);
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
 };
 exports.setInterval = function() {
-  return new Timeout(apply.call(setInterval, scope, arguments), clearInterval);
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
 };
 exports.clearTimeout =
 exports.clearInterval = function(timeout) {
@@ -35409,7 +35385,7 @@ function Timeout(id, clearFn) {
 }
 Timeout.prototype.unref = Timeout.prototype.ref = function() {};
 Timeout.prototype.close = function() {
-  this._clearFn.call(scope, this._id);
+  this._clearFn.call(window, this._id);
 };
 
 // Does not start the time, just sets up the members needed.
@@ -35436,21 +35412,13 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(172);
-// On some exotic environments, it's not clear which object `setimmediate` was
-// able to install onto.  Search each possibility in the same order as the
-// `setimmediate` library.
-exports.setImmediate = (typeof self !== "undefined" && self.setImmediate) ||
-                       (typeof global !== "undefined" && global.setImmediate) ||
-                       (this && this.setImmediate);
-exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
-                         (typeof global !== "undefined" && global.clearImmediate) ||
-                         (this && this.clearImmediate);
+__webpack_require__(171);
+exports.setImmediate = setImmediate;
+exports.clearImmediate = clearImmediate;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
-/* 172 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -35640,10 +35608,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11), __webpack_require__(18)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12), __webpack_require__(18)))
 
 /***/ }),
-/* 173 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {
@@ -35714,10 +35682,10 @@ function config (name) {
   return String(val).toLowerCase() === 'true';
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
 
 /***/ }),
-/* 174 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -35770,35 +35738,35 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 };
 
 /***/ }),
-/* 175 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(27);
 
 
 /***/ }),
-/* 176 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(12);
+module.exports = __webpack_require__(11);
 
 
 /***/ }),
-/* 177 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(26).Transform
 
 
 /***/ }),
-/* 178 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(26).PassThrough
 
 
 /***/ }),
-/* 179 */
+/* 178 */
 /***/ (function(module, exports) {
 
 exports.endianness = function () { return 'LE' };
@@ -35853,7 +35821,7 @@ exports.homedir = function () {
 
 
 /***/ }),
-/* 180 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -35871,11 +35839,11 @@ var _editorProxy = __webpack_require__(5);
 
 var _editorProxy2 = _interopRequireDefault(_editorProxy);
 
-var _scrollManager = __webpack_require__(181);
+var _scrollManager = __webpack_require__(180);
 
 var _scrollManager2 = _interopRequireDefault(_scrollManager);
 
-var _sectionManager = __webpack_require__(182);
+var _sectionManager = __webpack_require__(181);
 
 var _sectionManager2 = _interopRequireDefault(_sectionManager);
 
@@ -36001,7 +35969,7 @@ _editorProxy2.default.defineExtension('scrollSync', scrollSyncExtension);
 exports.default = scrollSyncExtension;
 
 /***/ }),
-/* 181 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36438,7 +36406,7 @@ var ScrollManager = function () {
 exports.default = ScrollManager;
 
 /***/ }),
-/* 182 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36951,7 +36919,7 @@ function findElementNodeFilter() {
 exports.default = SectionManager;
 
 /***/ }),
-/* 183 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36965,57 +36933,57 @@ var _editorProxy = __webpack_require__(5);
 
 var _editorProxy2 = _interopRequireDefault(_editorProxy);
 
-__webpack_require__(184);
+__webpack_require__(183);
 
-var _mergedTableCreator = __webpack_require__(185);
+var _mergedTableCreator = __webpack_require__(184);
 
 var _mergedTableCreator2 = _interopRequireDefault(_mergedTableCreator);
 
-var _tableUnmergePreparer = __webpack_require__(186);
+var _tableUnmergePreparer = __webpack_require__(185);
 
 var _tableUnmergePreparer2 = _interopRequireDefault(_tableUnmergePreparer);
 
-var _toMarkRenderer = __webpack_require__(187);
+var _toMarkRenderer = __webpack_require__(186);
 
 var _toMarkRenderer2 = _interopRequireDefault(_toMarkRenderer);
 
-var _wwMergedTableManager = __webpack_require__(188);
+var _wwMergedTableManager = __webpack_require__(187);
 
 var _wwMergedTableManager2 = _interopRequireDefault(_wwMergedTableManager);
 
-var _wwMergedTableSelectionManager = __webpack_require__(189);
+var _wwMergedTableSelectionManager = __webpack_require__(188);
 
 var _wwMergedTableSelectionManager2 = _interopRequireDefault(_wwMergedTableSelectionManager);
 
-var _mergedTableAddRow = __webpack_require__(190);
+var _mergedTableAddRow = __webpack_require__(189);
 
 var _mergedTableAddRow2 = _interopRequireDefault(_mergedTableAddRow);
 
-var _mergedTableAddCol = __webpack_require__(191);
+var _mergedTableAddCol = __webpack_require__(190);
 
 var _mergedTableAddCol2 = _interopRequireDefault(_mergedTableAddCol);
 
-var _mergedTableRemoveRow = __webpack_require__(192);
+var _mergedTableRemoveRow = __webpack_require__(191);
 
 var _mergedTableRemoveRow2 = _interopRequireDefault(_mergedTableRemoveRow);
 
-var _mergedTableRemoveCol = __webpack_require__(193);
+var _mergedTableRemoveCol = __webpack_require__(192);
 
 var _mergedTableRemoveCol2 = _interopRequireDefault(_mergedTableRemoveCol);
 
-var _mergedTableAlignCol = __webpack_require__(194);
+var _mergedTableAlignCol = __webpack_require__(193);
 
 var _mergedTableAlignCol2 = _interopRequireDefault(_mergedTableAlignCol);
 
-var _mergeCell = __webpack_require__(195);
+var _mergeCell = __webpack_require__(194);
 
 var _mergeCell2 = _interopRequireDefault(_mergeCell);
 
-var _unmergeCell = __webpack_require__(196);
+var _unmergeCell = __webpack_require__(195);
 
 var _unmergeCell2 = _interopRequireDefault(_unmergeCell);
 
-var _mergedTableUI = __webpack_require__(197);
+var _mergedTableUI = __webpack_require__(196);
 
 var _mergedTableUI2 = _interopRequireDefault(_mergedTableUI);
 
@@ -37151,7 +37119,7 @@ function _bindEvents(eventManager) {
 _editorProxy2.default.defineExtension('table', tableExtension);
 
 /***/ }),
-/* 184 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37276,7 +37244,7 @@ if (i18n) {
 }
 
 /***/ }),
-/* 185 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37507,7 +37475,7 @@ function createMergedTable(tableElement) {
 }
 
 /***/ }),
-/* 186 */
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37565,7 +37533,7 @@ function prepareTableUnmerge(tableElement) {
 }
 
 /***/ }),
-/* 187 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37685,7 +37653,7 @@ exports.default = _toMark2.default.Renderer.factory(_toMark2.default.gfmRenderer
 });
 
 /***/ }),
-/* 188 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38386,7 +38354,7 @@ function any(arr, contition) {
 exports.default = WwMergedTableManager;
 
 /***/ }),
-/* 189 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38588,7 +38556,7 @@ var WwMergedTableSelectionManager = function (_WwTableSelectionMana) {
 exports.default = WwMergedTableSelectionManager;
 
 /***/ }),
-/* 190 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38765,7 +38733,7 @@ function _findFocusTd($newTable, rowIndex, colIndex) {
 exports.default = AddRow;
 
 /***/ }),
-/* 191 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38966,7 +38934,7 @@ function _findFocusCell($newTable, rowIndex, colIndex) {
 exports.default = AddCol;
 
 /***/ }),
-/* 192 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39153,7 +39121,7 @@ function _findFocusTd($newTable, rowIndex, colIndex) {
 exports.default = RemoveRow;
 
 /***/ }),
-/* 193 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39333,7 +39301,7 @@ function _findFocusCell($newTable, rowIndex, colIndex) {
 exports.default = RemoveCol;
 
 /***/ }),
-/* 194 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39448,7 +39416,7 @@ function _findFocusCell($newTable, $startContainer) {
 exports.default = AlignCol;
 
 /***/ }),
-/* 195 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39670,7 +39638,7 @@ function _findFocusCell($newTable, rowIndex, colIndex) {
 exports.default = MergeCell;
 
 /***/ }),
-/* 196 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39850,7 +39818,7 @@ function _findFocusCell($newTable, rowIndex, colIndex) {
 exports.default = UnmergeCell;
 
 /***/ }),
-/* 197 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39952,7 +39920,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 198 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39966,7 +39934,7 @@ var _jquery = __webpack_require__(0);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _tuiColorPicker = __webpack_require__(199);
+var _tuiColorPicker = __webpack_require__(198);
 
 var _tuiColorPicker2 = _interopRequireDefault(_tuiColorPicker);
 
@@ -40313,13 +40281,13 @@ _editorProxy2.default.defineExtension('colorSyntax', colorSyntaxExtension);
 exports.default = colorSyntaxExtension;
 
 /***/ }),
-/* 199 */
+/* 198 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_199__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_198__;
 
 /***/ }),
-/* 200 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40329,7 +40297,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _plantumlEncoder = __webpack_require__(201);
+var _plantumlEncoder = __webpack_require__(200);
 
 var _plantumlEncoder2 = _interopRequireDefault(_plantumlEncoder);
 
@@ -40396,13 +40364,13 @@ _editorProxy2.default.defineExtension('uml', umlExtension);
 exports.default = umlExtension;
 
 /***/ }),
-/* 201 */
+/* 200 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_201__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_200__;
 
 /***/ }),
-/* 202 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
