@@ -194,6 +194,13 @@ class Convertor {
 
     let markdown = toMark(this._appendAttributeForBrIfNeed(html), toMarkOptions);
 
+    const matchs = markdown.match(/\+\+(.*?)\+\+/gm);
+    if (matchs) {
+      matchs.forEach(match => {
+        markdown = markdown.replace(match, match.replace(/ |\u00a0/g, '&nbsp;'));
+      });
+    }
+
     markdown = this.eventManager.emitReduce('convertorAfterHtmlToMarkdownConverted', markdown);
 
     util.forEach(markdown.split('\n'), (line, index) => {
@@ -235,7 +242,7 @@ class Convertor {
 
     html = html.replace(FIND_PASSING_AND_NORMAL_BR_RX, '<br data-tomark-pass /><br data-tomark-pass />$1');
     html = html.replace(FIND_FIRST_TWO_BRS_RX, '$1<br /><br />');
-    html = html.replace('<u>', '++').replace('</u>', '++');
+    html = html.replace(/<u>|<\/u>/g, '++');
 
     return html;
   }
