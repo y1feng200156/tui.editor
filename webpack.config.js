@@ -35,7 +35,7 @@ const DIST_DIR_NAME = 'dist';
 const DIST_PATH = path.join(__dirname, DIST_DIR_NAME);
 const DIST_JS_NAME = `tui-editor-[name]${isProduction ? '.min' : ''}.js`;
 const ANALYZER_DIR = '../report/webpack';
-const PUBLIC_PATH = `http://localhost:8080/${DIST_DIR_NAME}/`;
+const PUBLIC_PATH = `http://localhost:8081/${DIST_DIR_NAME}/`;
 const BANNER = [
   pkg.name,
   `@version ${pkg.version}`,
@@ -172,7 +172,7 @@ if (isDevServer) {
   defaultConfigs[0].devServer = {
     host: '0.0.0.0',
     disableHostCheck: true,
-    port: 8080,
+    port: 8081,
     publicPath: PUBLIC_PATH,
     noInfo: true,
     inline: true,

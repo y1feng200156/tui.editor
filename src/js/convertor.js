@@ -6,6 +6,7 @@ import $ from 'jquery';
 import util from 'tui-code-snippet';
 import MarkdownIt from 'markdown-it';
 import toMark from 'to-mark';
+import ins from 'markdown-it-ins';
 
 import htmlSanitizer from './htmlSanitizer';
 import taskList from './markdownItPlugins/markdownitTaskPlugin';
@@ -45,6 +46,7 @@ markdownitHighlight.block.ruler.at('html_block', htmlBlock, {
   alt: ['paragraph', 'reference', 'blockquote']
 });
 markdownitHighlight.inline.ruler.at('backticks', codeBackticks);
+markdownitHighlight.use(ins);
 markdownitHighlight.use(taskList);
 markdownitHighlight.use(codeBlock);
 
@@ -60,6 +62,7 @@ markdownit.block.ruler.at('html_block', htmlBlock, {
   alt: ['paragraph', 'reference', 'blockquote']
 });
 markdownit.inline.ruler.at('backticks', codeBackticks);
+markdownit.use(ins);
 markdownit.use(taskList);
 markdownit.use(codeBlock);
 
@@ -232,6 +235,7 @@ class Convertor {
 
     html = html.replace(FIND_PASSING_AND_NORMAL_BR_RX, '<br data-tomark-pass /><br data-tomark-pass />$1');
     html = html.replace(FIND_FIRST_TWO_BRS_RX, '$1<br /><br />');
+    html = html.replace('<u>', '++').replace('</u>', '++');
 
     return html;
   }
