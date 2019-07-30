@@ -3179,6 +3179,9 @@ var Convertor = function () {
 
       var markdown = (0, _toMark2.default)(this._appendAttributeForBrIfNeed(html), toMarkOptions);
 
+      markdown = markdown.replace(/\+/g, '\\+');
+      markdown = markdown.replace(/<u>|<\/u>/g, '++');
+
       var matchs = markdown.match(/\+\+(.*?)\+\+/gm);
       if (matchs) {
         matchs.forEach(function (match) {
@@ -3228,7 +3231,7 @@ var Convertor = function () {
 
       html = html.replace(FIND_PASSING_AND_NORMAL_BR_RX, '<br data-tomark-pass /><br data-tomark-pass />$1');
       html = html.replace(FIND_FIRST_TWO_BRS_RX, '$1<br /><br />');
-      html = html.replace(/<u>|<\/u>/g, '++');
+      // html = html.replace(/<u>|<\/u>/g, '++');
 
       return html;
     }
