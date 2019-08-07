@@ -4,7 +4,7 @@
  */
 import $ from 'jquery';
 import util from 'tui-code-snippet';
-import Squire from 'squire-rte';
+import Squire from 'copy-squire-rte';
 
 import domUtils from './domUtils';
 import {isMac} from './util';
