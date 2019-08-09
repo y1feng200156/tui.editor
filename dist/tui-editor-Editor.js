@@ -3181,6 +3181,8 @@ var Convertor = function () {
 
       markdown = markdown.replace(/\+/g, '\\+');
       markdown = markdown.replace(/<u>|<\/u>/g, '++');
+      markdown = markdown.replace(/\u00a0/g, '&nbsp;');
+      markdown = markdown.replace(/ {2}/g, ' &nbsp;');
 
       var matchs = markdown.match(/\+\+(.*?)\+\+/gm);
       if (matchs) {
