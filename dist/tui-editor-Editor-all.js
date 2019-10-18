@@ -20230,7 +20230,7 @@ var WwPasteContentHelper = function () {
   }, {
     key: '_unwrapNestedBlocks',
     value: function _unwrapNestedBlocks($container, blockTags) {
-      var $leafElements = $container.find(':not(:has(*))').not('b,s,i,em,code,span');
+      var $leafElements = $container.find(':not(:has(*))').not('b,s,i,em,code,span,u');
 
       $leafElements.each(function (i, node) {
         var leafElement = node.nodeName === 'BR' ? (0, _jquery2.default)(node.parentNode) : (0, _jquery2.default)(node);

@@ -159,7 +159,7 @@ class WwPasteContentHelper {
    * @private
    */
   _unwrapNestedBlocks($container, blockTags) {
-    const $leafElements = $container.find(':not(:has(*))').not('b,s,i,em,code,span');
+    const $leafElements = $container.find(':not(:has(*))').not('b,s,i,em,code,span,u');
 
     $leafElements.each((i, node) => {
       let leafElement = node.nodeName === 'BR' ? $(node.parentNode) : $(node);
